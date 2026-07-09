@@ -2,16 +2,39 @@ import { useCallback } from 'react'
 
 export function useSpeech() {
   const speak = useCallback((text: string, lang = 'ja-JP') => {
-    if (!('speechSynthesis' in window)) return
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
 
-    window.speechSynthesis.cancel()
+    const synth = window.speechSynthesis
 
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = lang
-    utterance.rate = 0.85
-    utterance.pitch = 1
+    let hasSpoken = false
 
-    window.speechSynthesis.speak(utterance)
+    const speakNow = () => {
+      if (hasSpoken) return
+      hasSpoken = true
+
+      synth.cancel()
+      synth.resume()
+
+      const utterance = new SpeechSynthesisUtterance(text)
+      const voices = synth.getVoices()
+      const japaneseVoice = voices.find((voice) => voice.lang.toLowerCase().startsWith(lang.toLowerCase()))
+        ?? voices.find((voice) => voice.lang.toLowerCase().startsWith('ja'))
+
+      utterance.lang = lang
+      utterance.voice = japaneseVoice ?? null
+      utterance.rate = 0.85
+      utterance.pitch = 1
+
+      synth.speak(utterance)
+    }
+
+    if (synth.getVoices().length > 0) {
+      speakNow()
+      return
+    }
+
+    synth.addEventListener('voiceschanged', speakNow, { once: true })
+    setTimeout(speakNow, 150)
   }, [])
 
   const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window

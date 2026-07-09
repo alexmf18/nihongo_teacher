@@ -103,19 +103,19 @@ const KANJI_GROUPS: KanjiGroup[] = [
 
 function KanjiCard({ entry, onSpeak }: { entry: KanjiEntry; onSpeak: (text: string) => void }) {
   return (
-    <div className="bg-white rounded-2xl border-2 border-rose-100 p-4 flex flex-col items-center w-40 hover:border-rose-400 hover:bg-rose-50 transition-colors">
+    <div className="flex w-40 flex-col items-center rounded-lg border border-[#f0d7df] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)] transition-colors hover:border-[#c70039] hover:bg-[#fff5f8]">
       <button
         onClick={() => onSpeak(entry.kanji)}
-        className="text-5xl font-medium text-rose-700 mb-2 cursor-pointer hover:scale-110 transition-transform"
-        title="Escuchar pronunciación"
+        className="mb-2 cursor-pointer text-5xl font-semibold text-[#c70039] transition-transform hover:scale-110"
+        title="Escuchar pronunciacion"
       >
         {entry.kanji}
       </button>
-      <span className="text-xs text-gray-400 mb-1 text-center leading-tight">{entry.onyomi}</span>
+      <span className="mb-1 text-center text-xs leading-tight text-slate-400">{entry.onyomi}</span>
       {entry.kunyomi && (
-        <span className="text-xs text-gray-400 mb-1 text-center leading-tight">{entry.kunyomi}</span>
+        <span className="mb-1 text-center text-xs leading-tight text-slate-400">{entry.kunyomi}</span>
       )}
-      <span className="text-sm font-medium text-gray-600 mt-1 text-center">{entry.meaning}</span>
+      <span className="mt-1 text-center text-sm font-bold text-slate-600">{entry.meaning}</span>
     </div>
   )
 }
@@ -124,12 +124,12 @@ export function KanjiTable() {
   const { speak } = useSpeech()
 
   return (
-    <div className="flex-1 py-8 px-4">
+    <div className="flex-1 px-6 py-10">
       <div className="max-w-5xl mx-auto space-y-10">
         {KANJI_GROUPS.map((group) => (
           <div key={group.title} className="mb-8">
-            <h2 className="text-xl font-bold text-gray-800 mb-1 text-center">{group.title}</h2>
-            <p className="text-sm text-gray-400 mb-4 text-center">{group.subtitle}</p>
+            <h2 className="mb-1 text-center text-xl font-extrabold text-slate-950">{group.title}</h2>
+            <p className="mb-4 text-center text-sm font-semibold text-slate-400">{group.subtitle}</p>
             <div className="flex flex-wrap justify-center gap-3">
               {group.entries.map((entry) => (
                 <KanjiCard key={entry.kanji} entry={entry} onSpeak={speak} />

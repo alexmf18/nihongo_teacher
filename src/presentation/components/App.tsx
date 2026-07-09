@@ -20,7 +20,7 @@ export function App() {
   } = useCharacterQuiz()
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[#f7f7fb] text-slate-950">
       <Sidebar
         selected={state.category}
         selectedPhrase={state.phraseCategory}
