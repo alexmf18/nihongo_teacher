@@ -5,6 +5,9 @@ export enum CharacterCategory {
   WORD = 'word',
   PHRASE = 'phrase',
   NUMBER = 'number',
+  HIRAGANA_TABLE = 'hiragana_table',
+  KATAKANA_TABLE = 'katakana_table',
+  KANJI_TABLE = 'kanji_table',
 }
 
 export enum PhraseCategory {
