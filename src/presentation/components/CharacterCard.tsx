@@ -12,6 +12,7 @@ export function CharacterCard({ character, category }: CharacterCardProps) {
     [CharacterCategory.KANJI]: 'bg-rose-50 border-rose-200 text-rose-700',
     [CharacterCategory.WORD]: 'bg-amber-50 border-amber-200 text-amber-700',
     [CharacterCategory.PHRASE]: 'bg-purple-50 border-purple-200 text-purple-700',
+    [CharacterCategory.NUMBER]: 'bg-cyan-50 border-cyan-200 text-cyan-700',
   }
 
   const categoryLabels: Record<CharacterCategory, string> = {
@@ -20,6 +21,7 @@ export function CharacterCard({ character, category }: CharacterCardProps) {
     [CharacterCategory.KANJI]: 'Kanji',
     [CharacterCategory.WORD]: 'Palabra',
     [CharacterCategory.PHRASE]: 'Frase',
+    [CharacterCategory.NUMBER]: 'Número',
   }
 
   const fontSizeClass =

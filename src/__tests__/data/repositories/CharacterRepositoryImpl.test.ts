@@ -34,6 +34,12 @@ describe('CharacterRepositoryImpl', () => {
     chars.forEach((c) => expect(c.category).toBe(CharacterCategory.PHRASE))
   })
 
+  it('returns numbers', () => {
+    const chars = repository.getByCategory(CharacterCategory.NUMBER)
+    expect(chars.length).toBeGreaterThan(0)
+    chars.forEach((c) => expect(c.category).toBe(CharacterCategory.NUMBER))
+  })
+
   it('filters phrases by subcategory', () => {
     const greetings = repository.getByCategory(CharacterCategory.PHRASE, PhraseCategory.GREETINGS)
     expect(greetings.length).toBeGreaterThan(0)
@@ -73,7 +79,8 @@ describe('CharacterRepositoryImpl', () => {
     const kanji = repository.getByCategory(CharacterCategory.KANJI)
     const words = repository.getByCategory(CharacterCategory.WORD)
     const phrases = repository.getByCategory(CharacterCategory.PHRASE)
-    expect(all.length).toBe(hiragana.length + katakana.length + kanji.length + words.length + phrases.length)
+    const numbers = repository.getByCategory(CharacterCategory.NUMBER)
+    expect(all.length).toBe(hiragana.length + katakana.length + kanji.length + words.length + phrases.length + numbers.length)
   })
 
   it('all characters have unique ids', () => {

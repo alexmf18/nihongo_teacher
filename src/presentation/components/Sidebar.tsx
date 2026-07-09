@@ -18,6 +18,7 @@ const mainCategories = [
   { key: CharacterCategory.KANJI, label: 'Kanji', emoji: '漢' },
   { key: CharacterCategory.WORD, label: 'Palabras', emoji: '詞' },
   { key: CharacterCategory.PHRASE, label: 'Frases', emoji: '📝' },
+  { key: CharacterCategory.NUMBER, label: 'Números', emoji: '🔢' },
 ]
 
 const phraseSubCategories = Object.values(PhraseCategory)

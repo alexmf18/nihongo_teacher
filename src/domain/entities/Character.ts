@@ -4,6 +4,7 @@ export enum CharacterCategory {
   KANJI = 'kanji',
   WORD = 'word',
   PHRASE = 'phrase',
+  NUMBER = 'number',
 }
 
 export enum PhraseCategory {

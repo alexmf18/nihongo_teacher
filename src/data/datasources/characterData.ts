@@ -437,4 +437,22 @@ export const characterData: Character[] = [
   { id: 'p-sumimasen', character: 'すみません', romaji: ['sumimasen'], meaning: 'Disculpe / Perdón', category: CharacterCategory.PHRASE, phraseCategory: PhraseCategory.COURTESY },
   { id: 'p-shitsurei', character: 'しつれいします', romaji: ['shitsurei shimasu', 'shitsureishimasu'], meaning: 'Con permiso / Disculpe', category: CharacterCategory.PHRASE, phraseCategory: PhraseCategory.COURTESY },
   { id: 'p-otsukaresama', character: 'おつかれさまでした', romaji: ['otsukaresama deshita', 'otsukaresamadeshita'], meaning: 'Buen trabajo (gracias por tu esfuerzo)', category: CharacterCategory.PHRASE, phraseCategory: PhraseCategory.COURTESY },
+
+  // ========================
+  // NUMBERS
+  // ========================
+  { id: 'n-1', character: '一', romaji: ['ichi'], meaning: 'uno', category: CharacterCategory.NUMBER },
+  { id: 'n-2', character: '二', romaji: ['ni'], meaning: 'dos', category: CharacterCategory.NUMBER },
+  { id: 'n-3', character: '三', romaji: ['san'], meaning: 'tres', category: CharacterCategory.NUMBER },
+  { id: 'n-4', character: '四', romaji: ['shi', 'yon'], meaning: 'cuatro', category: CharacterCategory.NUMBER },
+  { id: 'n-5', character: '五', romaji: ['go'], meaning: 'cinco', category: CharacterCategory.NUMBER },
+  { id: 'n-6', character: '六', romaji: ['roku'], meaning: 'seis', category: CharacterCategory.NUMBER },
+  { id: 'n-7', character: '七', romaji: ['shichi', 'nana'], meaning: 'siete', category: CharacterCategory.NUMBER },
+  { id: 'n-8', character: '八', romaji: ['hachi'], meaning: 'ocho', category: CharacterCategory.NUMBER },
+  { id: 'n-9', character: '九', romaji: ['kyuu', 'ku', 'kyu'], meaning: 'nueve', category: CharacterCategory.NUMBER },
+  { id: 'n-10', character: '十', romaji: ['juu', 'ju'], meaning: 'diez', category: CharacterCategory.NUMBER },
+  { id: 'n-100', character: '百', romaji: ['hyaku'], meaning: 'cien', category: CharacterCategory.NUMBER },
+  { id: 'n-1000', character: '千', romaji: ['sen'], meaning: 'mil', category: CharacterCategory.NUMBER },
+  { id: 'n-10000', character: '万', romaji: ['man'], meaning: 'diez mil', category: CharacterCategory.NUMBER },
+  { id: 'n-0', character: '零', romaji: ['rei', 'zero'], meaning: 'cero', category: CharacterCategory.NUMBER },
 ]
