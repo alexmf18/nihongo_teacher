@@ -1,6 +1,9 @@
 import { QuizState } from '../hooks/useCharacterQuiz'
+import { PracticeMode } from '../../domain/entities/PracticeMode'
 import { CharacterCard } from './CharacterCard'
 import { RomajiInput } from './RomajiInput'
+import { ChoiceGrid } from './ChoiceGrid'
+import { ModeSwitcher } from './ModeSwitcher'
 import { Feedback } from './Feedback'
 import { Character } from '../../domain/entities/Character'
 
@@ -9,6 +12,8 @@ interface QuizScreenProps {
   character: Character | null
   onAnswerChange: (value: string) => void
   onSubmit: () => void
+  onSelectChoice: (characterId: string) => void
+  onSetMode: (mode: PracticeMode) => void
   onNext: () => void
   onReveal: () => void
   onTryAgain: () => void
@@ -19,6 +24,8 @@ export function QuizScreen({
   character,
   onAnswerChange,
   onSubmit,
+  onSelectChoice,
+  onSetMode,
   onNext,
   onReveal,
   onTryAgain,
@@ -33,35 +40,65 @@ export function QuizScreen({
 
   const isAnswered = state.feedback !== 'idle'
   const progress = Math.max(0, Math.min(100, ((state.currentIndex + 1) / state.characters.length) * 100))
+  const isReverse = state.mode === PracticeMode.REVERSE
+  const isListening = state.mode === PracticeMode.LISTENING
+  const isChoice = state.mode === PracticeMode.MULTIPLE_CHOICE
+
+  const correctAnswerLabel = isReverse
+    ? `${character.character} (${character.romaji[0]})`
+    : character.romaji[0]
+  // Reverse mode already shows the meaning as the prompt, so repeating it in the
+  // feedback card would be redundant.
+  const contextLine = isReverse ? undefined : character.meaning
 
   return (
     <div className="flex min-h-full flex-1 items-center justify-center px-8 py-10 lg:px-16">
       <section className="mx-auto w-full max-w-[760px]">
         <div className="min-h-[520px] rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_14px_35px_rgba(15,23,42,0.06)] ring-1 ring-slate-100">
-          <div className="ml-auto flex w-fit items-center gap-3">
-            <div className="h-1.5 w-28 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full rounded-full bg-emerald-600" style={{ width: `${progress}%` }} />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <ModeSwitcher mode={state.mode} onSelect={onSetMode} />
+            <div className="ml-auto flex w-fit items-center gap-3">
+              <div className="h-1.5 w-28 overflow-hidden rounded-full bg-slate-200">
+                <div className="h-full rounded-full bg-emerald-600" style={{ width: `${progress}%` }} />
+              </div>
+              <span className="text-sm font-semibold text-slate-500">
+                {state.currentIndex + 1}/{state.characters.length}
+              </span>
             </div>
-            <span className="text-sm font-semibold text-slate-500">
-              {state.currentIndex + 1}/{state.characters.length}
-            </span>
           </div>
 
-          <CharacterCard character={character.character} category={state.category} />
+          <CharacterCard
+            displayText={isReverse ? character.meaning ?? character.character : character.character}
+            speakText={character.character}
+            category={state.category}
+            hidden={isListening && !isAnswered}
+          />
 
           <div className="mx-auto mt-2 w-full max-w-[490px]">
-            <RomajiInput
-              value={state.answer}
-              onChange={onAnswerChange}
-              onSubmit={onSubmit}
-              disabled={isAnswered}
-            />
+            {isChoice ? (
+              <ChoiceGrid
+                choices={state.choices ?? []}
+                labelFor={(choice) => choice.romaji[0]}
+                selectedId={state.answer || undefined}
+                correctId={character.id}
+                disabled={isAnswered}
+                onSelect={onSelectChoice}
+              />
+            ) : (
+              <RomajiInput
+                value={state.answer}
+                onChange={onAnswerChange}
+                onSubmit={onSubmit}
+                disabled={isAnswered}
+              />
+            )}
           </div>
 
           <Feedback
             feedback={state.feedback}
             showAnswer={state.showAnswer}
-            character={character}
+            correctAnswerLabel={correctAnswerLabel}
+            contextLine={contextLine}
             onNext={onNext}
             onReveal={onReveal}
             onTryAgain={onTryAgain}

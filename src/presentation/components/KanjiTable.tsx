@@ -103,10 +103,10 @@ const KANJI_GROUPS: KanjiGroup[] = [
 
 function KanjiCard({ entry, onSpeak }: { entry: KanjiEntry; onSpeak: (text: string) => void }) {
   return (
-    <div className="flex w-40 flex-col items-center rounded-lg border border-[#f0d7df] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)] transition-colors hover:border-[#c70039] hover:bg-[#fff5f8]">
+    <div className="flex w-40 flex-col items-center rounded-lg border border-accent-border bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)] transition-colors hover:border-accent hover:bg-accent-light">
       <button
         onClick={() => onSpeak(entry.kanji)}
-        className="mb-2 cursor-pointer text-5xl font-semibold text-[#c70039] transition-transform hover:scale-110"
+        className="mb-2 cursor-pointer text-5xl font-semibold text-accent transition-transform hover:scale-110"
         title="Escuchar pronunciacion"
       >
         {entry.kanji}

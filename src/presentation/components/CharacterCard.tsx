@@ -1,12 +1,15 @@
+import { useEffect } from 'react'
 import { CharacterCategory } from '../../domain/entities/Character'
 import { useSpeech } from '../hooks/useSpeech'
 
 interface CharacterCardProps {
-  character: string
+  displayText: string
+  speakText: string
   category: CharacterCategory
+  hidden?: boolean
 }
 
-export function CharacterCard({ character, category }: CharacterCardProps) {
+export function CharacterCard({ displayText, speakText, category, hidden = false }: CharacterCardProps) {
   const { speak, isSupported } = useSpeech()
 
   const categoryLabels: Record<CharacterCategory, string> = {
@@ -19,25 +22,38 @@ export function CharacterCard({ character, category }: CharacterCardProps) {
     [CharacterCategory.HIRAGANA_TABLE]: 'Tabla',
     [CharacterCategory.KATAKANA_TABLE]: 'Tabla',
     [CharacterCategory.KANJI_TABLE]: 'Tabla',
+    [CharacterCategory.NUMBER_TABLE]: 'Tabla',
+    [CharacterCategory.WORD_TABLE]: 'Tabla',
+    [CharacterCategory.PHRASE_TABLE]: 'Tabla',
   }
 
-  const fontSizeClass =
-    (category === CharacterCategory.WORD || category === CharacterCategory.PHRASE) && character.length > 4
-      ? 'text-3xl sm:text-4xl'
-      : 'text-8xl sm:text-9xl'
+  useEffect(() => {
+    if (hidden) {
+      speak(speakText)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hidden, speakText])
+
+  const fontSizeClass = displayText.length > 4 ? 'text-3xl sm:text-4xl' : 'text-8xl sm:text-9xl'
 
   return (
     <div className="flex flex-col items-center justify-center pb-10 pt-24">
       <div className="relative">
-        <span
-          className={`${fontSizeClass} block select-none px-8 py-4 font-semibold leading-none text-[#c70039]`}
-        >
-          {character}
-        </span>
+        {hidden ? (
+          <span className="block select-none px-8 py-4 text-8xl leading-none text-accent-border" aria-hidden="true">
+            ♪
+          </span>
+        ) : (
+          <span
+            className={`${fontSizeClass} block select-none px-8 py-4 font-semibold leading-none text-accent`}
+          >
+            {displayText}
+          </span>
+        )}
         {isSupported && (
           <button
-            onClick={() => speak(character)}
-            className="absolute -right-5 -top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm ring-1 ring-slate-200 transition-colors hover:text-[#c70039]"
+            onClick={() => speak(speakText)}
+            className="absolute -right-5 -top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm ring-1 ring-slate-200 transition-colors hover:text-accent"
             title="Escuchar pronunciacion"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">

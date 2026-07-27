@@ -8,6 +8,9 @@ export enum CharacterCategory {
   HIRAGANA_TABLE = 'hiragana_table',
   KATAKANA_TABLE = 'katakana_table',
   KANJI_TABLE = 'kanji_table',
+  NUMBER_TABLE = 'number_table',
+  WORD_TABLE = 'word_table',
+  PHRASE_TABLE = 'phrase_table',
 }
 
 export enum PhraseCategory {
@@ -26,6 +29,11 @@ export const PHRASE_CATEGORY_LABELS: Record<PhraseCategory, string> = {
   [PhraseCategory.COURTESY]: 'Cortesía',
 }
 
+export interface ExampleSentence {
+  japanese: string
+  translation: string
+}
+
 export interface Character {
   id: string
   character: string
@@ -33,4 +41,5 @@ export interface Character {
   category: CharacterCategory
   meaning?: string
   phraseCategory?: PhraseCategory
+  exampleSentence?: ExampleSentence
 }

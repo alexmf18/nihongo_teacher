@@ -4,20 +4,27 @@ import {
   PhraseCategory,
   PHRASE_CATEGORY_LABELS,
 } from '../../domain/entities/Character'
+import { GrammarScreen, GRAMMAR_SCREEN_LABELS } from '../../domain/entities/GrammarScreen'
+import { STATS_SCREEN_KEY, StatsScreenKey } from '../../domain/entities/StatsScreen'
 
 interface SidebarProps {
-  selected: CharacterCategory
+  selected: CharacterCategory | GrammarScreen | StatsScreenKey
   selectedPhrase?: PhraseCategory
   onSelect: (category: CharacterCategory) => void
   onSelectPhrase: (subCategory: PhraseCategory) => void
+  onSelectGrammar: (screen: GrammarScreen) => void
+  onSelectStats: () => void
 }
 
-type SidebarIcon = 'kana' | 'katakana' | 'book' | 'kanji' | 'words' | 'phrase' | 'number'
+type SidebarIcon = 'kana' | 'katakana' | 'book' | 'kanji' | 'words' | 'phrase' | 'number' | 'stats'
 
 const learningCategories = [
   { key: CharacterCategory.HIRAGANA_TABLE, label: 'Tabla Hiragana', icon: 'book' },
   { key: CharacterCategory.KATAKANA_TABLE, label: 'Tabla Katakana', icon: 'book' },
   { key: CharacterCategory.KANJI_TABLE, label: 'Tabla Kanji', icon: 'book' },
+  { key: CharacterCategory.NUMBER_TABLE, label: 'Tabla de Números', icon: 'number' },
+  { key: CharacterCategory.WORD_TABLE, label: 'Tabla de Palabras', icon: 'words' },
+  { key: CharacterCategory.PHRASE_TABLE, label: 'Tabla de Frases', icon: 'phrase' },
 ] satisfies { key: CharacterCategory; label: string; icon: SidebarIcon }[]
 
 const practiceCategories = [
@@ -28,6 +35,18 @@ const practiceCategories = [
   { key: CharacterCategory.PHRASE, label: 'Frases', icon: 'phrase' },
   { key: CharacterCategory.NUMBER, label: 'Números', icon: 'number' },
 ] satisfies { key: CharacterCategory; label: string; icon: SidebarIcon }[]
+
+const grammarCategories = [
+  { key: GrammarScreen.PARTICLE_TABLE, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.PARTICLE_TABLE], icon: 'phrase' },
+  { key: GrammarScreen.PARTICLE_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.PARTICLE_QUIZ], icon: 'phrase' },
+  { key: GrammarScreen.CONJUGATION_TABLE, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.CONJUGATION_TABLE], icon: 'kanji' },
+  { key: GrammarScreen.CONJUGATION_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.CONJUGATION_QUIZ], icon: 'kanji' },
+  { key: GrammarScreen.COUNTER_TABLE, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.COUNTER_TABLE], icon: 'number' },
+] satisfies { key: GrammarScreen; label: string; icon: SidebarIcon }[]
+
+const statsCategories = [
+  { key: STATS_SCREEN_KEY, label: 'Mi progreso', icon: 'stats' },
+] satisfies { key: StatsScreenKey; label: string; icon: SidebarIcon }[]
 
 const phraseSubCategories = Object.values(PhraseCategory)
 
@@ -71,6 +90,14 @@ function Icon({ name }: { name: SidebarIcon }) {
     )
   }
 
+  if (name === 'stats') {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M5 20V10M12 20V4M19 20v-7" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )
+  }
+
   return null
 }
 
@@ -84,9 +111,9 @@ function CategorySection({
   onSelectPhrase,
 }: {
   title: string
-  cats: { key: CharacterCategory; label: string; icon: SidebarIcon }[]
-  selected: CharacterCategory
-  onCatClick: (key: CharacterCategory) => void
+  cats: { key: string; label: string; icon: SidebarIcon }[]
+  selected: string
+  onCatClick: (key: string) => void
   phrasesOpen: boolean
   selectedPhrase?: PhraseCategory
   onSelectPhrase: (sub: PhraseCategory) => void
@@ -104,7 +131,7 @@ function CategorySection({
               onClick={() => onCatClick(cat.key)}
               className={`flex w-full items-center gap-4 rounded-lg px-5 py-3 text-left text-[15px] transition-colors ${
                 isActive
-                  ? 'bg-[#fbedf3] text-[#c70039]'
+                  ? 'bg-accent-soft text-accent'
                   : 'text-slate-500 hover:bg-white hover:text-slate-950'
               }`}
             >
@@ -113,7 +140,7 @@ function CategorySection({
             </button>
 
             {cat.key === CharacterCategory.PHRASE && phrasesOpen && (
-              <div className="mb-1 ml-8 mt-1 space-y-1 border-l border-[#f0d7df] pl-3">
+              <div className="mb-1 ml-8 mt-1 space-y-1 border-l border-accent-border pl-3">
                 {phraseSubCategories.map((sub) => {
                   const isSubActive = selectedPhrase === sub
                   return (
@@ -122,7 +149,7 @@ function CategorySection({
                       onClick={() => onSelectPhrase(sub)}
                       className={`w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${
                         isSubActive
-                          ? 'bg-white text-[#c70039] shadow-sm'
+                          ? 'bg-white text-accent shadow-sm'
                           : 'text-slate-400 hover:bg-white hover:text-slate-700'
                       }`}
                     >
@@ -139,10 +166,10 @@ function CategorySection({
   )
 }
 
-export function Sidebar({ selected, selectedPhrase, onSelect, onSelectPhrase }: SidebarProps) {
+export function Sidebar({ selected, selectedPhrase, onSelect, onSelectPhrase, onSelectGrammar, onSelectStats }: SidebarProps) {
   const [phrasesOpen, setPhrasesOpen] = useState(selected === CharacterCategory.PHRASE)
 
-  const handleCategoryClick = (key: CharacterCategory) => {
+  const handleCategoryClick = (key: string) => {
     if (key === CharacterCategory.PHRASE) {
       const willOpen = !phrasesOpen
       setPhrasesOpen(willOpen)
@@ -157,13 +184,23 @@ export function Sidebar({ selected, selectedPhrase, onSelect, onSelectPhrase }: 
       return
     }
     setPhrasesOpen(false)
-    onSelect(key)
+    onSelect(key as CharacterCategory)
+  }
+
+  const handleGrammarClick = (key: string) => {
+    setPhrasesOpen(false)
+    onSelectGrammar(key as GrammarScreen)
+  }
+
+  const handleStatsClick = () => {
+    setPhrasesOpen(false)
+    onSelectStats()
   }
 
   return (
-    <aside className="flex h-screen w-[280px] shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-[#fbfbfd]">
+    <aside className="flex h-screen w-[280px] shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-sidebar-bg">
       <div className="px-8 pb-9 pt-10">
-        <h1 className="font-serif text-[28px] font-bold leading-none text-[#c70039]">Nihongo Teacher</h1>
+        <h1 className="font-serif text-[28px] font-bold leading-none text-accent">Nihongo Teacher</h1>
         <p className="mt-2 text-[13px] font-semibold uppercase tracking-[0.26em] text-slate-700">Repaso de japones</p>
       </div>
 
@@ -185,6 +222,22 @@ export function Sidebar({ selected, selectedPhrase, onSelect, onSelectPhrase }: 
           phrasesOpen={phrasesOpen}
           selectedPhrase={selectedPhrase}
           onSelectPhrase={onSelectPhrase}
+        />
+        <CategorySection
+          title="Gramática"
+          cats={grammarCategories}
+          selected={selected}
+          onCatClick={handleGrammarClick}
+          phrasesOpen={false}
+          onSelectPhrase={() => {}}
+        />
+        <CategorySection
+          title="Progreso"
+          cats={statsCategories}
+          selected={selected}
+          onCatClick={handleStatsClick}
+          phrasesOpen={false}
+          onSelectPhrase={() => {}}
         />
       </nav>
     </aside>

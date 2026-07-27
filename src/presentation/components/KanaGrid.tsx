@@ -14,9 +14,9 @@ export function TableGrid({
   color?: 'indigo' | 'emerald' | 'rose'
 }) {
   const borderColor = {
-    indigo: 'border-[#f0d7df] hover:border-[#c70039] hover:bg-[#fff5f8] text-[#c70039]',
+    indigo: 'border-accent-border hover:border-accent hover:bg-accent-light text-accent',
     emerald: 'border-[#d7e8e0] hover:border-emerald-600 hover:bg-emerald-50 text-emerald-700',
-    rose: 'border-[#f0d7df] hover:border-[#c70039] hover:bg-[#fff5f8] text-[#c70039]',
+    rose: 'border-accent-border hover:border-accent hover:bg-accent-light text-accent',
   }
 
   const colSuffix = cols.length === 5 ? '段' : ''

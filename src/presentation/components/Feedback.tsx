@@ -1,9 +1,8 @@
-import { Character } from '../../domain/entities/Character'
-
 interface FeedbackProps {
   feedback: 'idle' | 'correct' | 'incorrect'
   showAnswer: boolean
-  character: Character | null
+  correctAnswerLabel: string
+  contextLine?: string
   onNext: () => void
   onReveal: () => void
   onTryAgain: () => void
@@ -12,7 +11,8 @@ interface FeedbackProps {
 export function Feedback({
   feedback,
   showAnswer,
-  character,
+  correctAnswerLabel,
+  contextLine,
   onNext,
   onReveal,
   onTryAgain,
@@ -24,9 +24,9 @@ export function Feedback({
       {feedback === 'correct' && (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center">
           <p className="text-lg font-bold text-emerald-700">¡Correcto!</p>
-          {character?.meaning && (
+          {contextLine && (
             <p className="mt-1 text-emerald-700">
-              {character.meaning}
+              {contextLine}
             </p>
           )}
           <button
@@ -39,25 +39,25 @@ export function Feedback({
       )}
 
       {feedback === 'incorrect' && (
-        <div className="rounded-xl border border-[#f0c7d3] bg-[#fff5f8] p-4 text-center">
-          <p className="text-lg font-bold text-[#c70039]">Incorrecto</p>
+        <div className="rounded-xl border border-accent-border-incorrect bg-accent-light p-4 text-center">
+          <p className="text-lg font-bold text-accent">Incorrecto</p>
 
-          {showAnswer && character && (
+          {showAnswer && (
             <div className="mt-3">
               <p className="text-slate-700">
                 Respuesta correcta:{' '}
-                <span className="text-lg font-bold text-[#c70039]">
-                  {character.romaji[0]}
+                <span className="text-lg font-bold text-accent">
+                  {correctAnswerLabel}
                 </span>
               </p>
-              {character.meaning && (
+              {contextLine && (
                 <p className="mt-1 italic text-slate-500">
-                  {character.meaning}
+                  {contextLine}
                 </p>
               )}
               <button
                 onClick={onNext}
-                className="mt-3 rounded-lg bg-[#c70039] px-6 py-2 font-bold text-white transition-colors hover:bg-[#ad0032]"
+                className="mt-3 rounded-lg bg-accent px-6 py-2 font-bold text-white transition-colors hover:bg-accent-dark"
               >
                 Siguiente →
               </button>
@@ -74,7 +74,7 @@ export function Feedback({
               </button>
               <button
                 onClick={onTryAgain}
-                className="rounded-lg bg-[#c70039] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#ad0032]"
+                className="rounded-lg bg-accent px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-accent-dark"
               >
                 Intentar de nuevo
               </button>
