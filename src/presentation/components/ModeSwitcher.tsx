@@ -6,9 +6,10 @@ interface ModeSwitcherProps {
   onSelect: (mode: PracticeMode) => void
 }
 
+// The active mode is underlined in red pen.
 export function ModeSwitcher({ mode, modes, onSelect }: ModeSwitcherProps) {
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-x-5 gap-y-1">
       {modes.map((candidate) => {
         const isActive = candidate === mode
         return (
@@ -16,10 +17,11 @@ export function ModeSwitcher({ mode, modes, onSelect }: ModeSwitcherProps) {
             key={candidate}
             type="button"
             onClick={() => onSelect(candidate)}
-            className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
+            aria-pressed={isActive}
+            className={`border-b-2 pb-1 pt-0.5 text-sm transition-colors ${
               isActive
-                ? 'bg-accent text-white'
-                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                ? 'border-accent font-bold text-sumi'
+                : 'border-transparent font-medium text-sumi-soft hover:border-keisen-strong hover:text-sumi'
             }`}
           >
             {PRACTICE_MODE_LABELS[candidate]}

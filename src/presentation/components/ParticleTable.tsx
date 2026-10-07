@@ -1,6 +1,9 @@
 import { useSpeech } from '../hooks/useSpeech'
+import { RefGroup, RefPage, refCard } from './ReferenceLayout'
 import { GrammarCategory, ParticleItem } from '../../domain/entities/GrammarItem'
 import { GrammarRepositoryImpl } from '../../data/repositories/GrammarRepositoryImpl'
+
+const repository = new GrammarRepositoryImpl()
 
 const PARTICLE_LABELS: Record<string, string> = {
   は: 'Tema (wa)',
@@ -42,39 +45,40 @@ function ParticleCard({ item, onSpeak }: { item: ParticleItem; onSpeak: (text: s
   const fullSentence = `${item.sentenceParts[0]}${item.particle}${item.sentenceParts[1]}`
 
   return (
-    <div className="flex w-64 flex-col items-center rounded-lg border border-accent-border bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)] transition-colors hover:border-accent hover:bg-accent-light">
+    <div className={`flex w-64 flex-col items-center text-center ${refCard}`}>
       <button
+        type="button"
         onClick={() => onSpeak(fullSentence)}
-        className="mb-2 cursor-pointer text-center text-lg font-semibold leading-snug text-accent transition-transform hover:scale-105"
-        title="Escuchar pronunciacion"
+        className="cursor-pointer rounded-sm font-kyokasho text-xl font-semibold leading-snug text-sumi transition-colors hover:text-sumi-soft"
+        title="Escuchar pronunciación"
       >
-        {fullSentence}
+        {item.sentenceParts[0]}
+        {/* The particle is the point of the example, so it is marked in red pen. */}
+        <span className="text-accent">{item.particle}</span>
+        {item.sentenceParts[1]}
       </button>
-      <span className="mt-1 text-center text-sm font-bold text-slate-600">{item.translation}</span>
+      <span className="mt-2 text-sm text-sumi-soft">{item.translation}</span>
     </div>
   )
 }
 
 export function ParticleTable() {
   const { speak } = useSpeech()
-  const repository = new GrammarRepositoryImpl()
   const groups = groupByParticle(repository.getByKind(GrammarCategory.PARTICLE))
 
   return (
-    <div className="flex-1 px-6 py-10">
-      <div className="max-w-5xl mx-auto space-y-10">
-        {groups.map((group) => (
-          <div key={group.particle} className="mb-8">
-            <h2 className="mb-1 text-center text-xl font-extrabold text-slate-950">{group.particle}</h2>
-            <p className="mb-4 text-center text-sm font-semibold text-slate-400">{group.label}</p>
-            <div className="flex flex-wrap justify-center gap-3">
-              {group.entries.map((entry) => (
-                <ParticleCard key={entry.id} item={entry} onSpeak={speak} />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <RefPage>
+      {groups.map((group) => (
+        <RefGroup
+          key={group.particle}
+          title={<span className="font-kyokasho text-3xl font-semibold">{group.particle}</span>}
+          subtitle={<span className="font-sans">{group.label}</span>}
+        >
+          {group.entries.map((entry) => (
+            <ParticleCard key={entry.id} item={entry} onSpeak={speak} />
+          ))}
+        </RefGroup>
+      ))}
+    </RefPage>
   )
 }

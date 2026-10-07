@@ -7,13 +7,13 @@ interface CounterPromptCardProps {
 
 export function CounterPromptCard({ item, number }: CounterPromptCardProps) {
   return (
-    <div className="flex flex-col items-center justify-center pb-6 pt-16 text-center">
-      <span className="block text-6xl font-semibold leading-none text-accent">
+    <div className="flex flex-col items-center justify-center pb-8 pt-12 text-center sm:pt-16">
+      <span className="block font-kyokasho text-6xl font-semibold leading-none text-sumi">
         {number}
         {item.counter}
       </span>
-      <p className="mt-3 text-sm text-slate-400">{item.usage}</p>
-      <p className="mt-5 text-xs font-bold uppercase tracking-[0.24em] text-slate-300">Contador</p>
+      <p className="mt-4 text-sumi-soft">{item.usage}</p>
+      <p className="mt-5 text-sm text-sumi-soft">Contador</p>
     </div>
   )
 }

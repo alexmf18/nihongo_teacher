@@ -28,36 +28,36 @@ export function SentencePromptCard({ item, dictation, answered }: SentencePrompt
   }, [item.id, dictation])
 
   return (
-    <div className="flex flex-col items-center justify-center pb-8 pt-14 text-center">
+    <div className="flex flex-col items-center justify-center pb-8 pt-12 text-center sm:pt-14">
       {dictation ? (
         <button
           type="button"
           onClick={() => speak(sentence)}
           disabled={!isSupported}
-          className="flex h-20 w-20 items-center justify-center rounded-full bg-accent text-white transition-colors hover:bg-accent-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:bg-slate-200"
+          className="flex h-20 w-20 items-center justify-center rounded-full bg-sumi text-white transition-colors hover:bg-black disabled:bg-keisen"
           title="Escuchar otra vez"
         >
           <SpeakerIcon className="h-9 w-9" />
           <span className="sr-only">Escuchar otra vez</span>
         </button>
       ) : (
-        <p className="max-w-lg text-2xl font-semibold leading-snug text-slate-800">{item.translation}</p>
+        <p className="max-w-lg text-2xl font-bold leading-snug text-sumi sm:text-[1.75rem]">{item.translation}</p>
       )}
 
-      {dictation && answered && <p className="mt-4 text-sm text-slate-500">{item.translation}</p>}
+      {dictation && answered && <p className="mt-4 text-sumi-soft">{item.translation}</p>}
 
       {!dictation && answered && isSupported && (
         <button
           type="button"
           onClick={() => speak(sentence)}
-          className="mt-3 flex items-center gap-1.5 rounded-md text-sm text-slate-500 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="mt-3 flex items-center gap-1.5 rounded-md text-sm text-sumi-soft hover:text-sumi"
         >
           <SpeakerIcon className="h-4 w-4" />
           Escuchar la frase
         </button>
       )}
 
-      <p className="mt-5 text-xs font-bold uppercase tracking-[0.24em] text-slate-300">
+      <p className="mt-5 text-sm text-sumi-soft">
         {dictation ? 'Escucha y ordena' : 'Ordena la frase'}
       </p>
     </div>

@@ -1,4 +1,5 @@
 import { SessionSummary as Summary } from '../../domain/entities/Session'
+import { Hanamaru } from './TeacherMarks'
 
 export interface MissedItem {
   id: string
@@ -16,69 +17,60 @@ interface SessionSummaryProps {
   onRestart: () => void
 }
 
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
+// Teachers draw はなまる next to work that goes well.
+const HANAMARU_THRESHOLD = 80
+
+const primaryButton = 'h-11 rounded-md bg-sumi px-6 font-bold text-white transition-colors hover:bg-black'
+const secondaryButton =
+  'h-11 rounded-md border border-keisen-strong bg-white px-6 font-bold text-sumi transition-colors hover:border-sumi'
 
 export function SessionSummary({ summary, missed, isReview, onReviewMistakes, onRestart }: SessionSummaryProps) {
   const hasMistakes = missed.length > 0
+  const earnedHanamaru = summary.total > 0 && summary.accuracyPercent >= HANAMARU_THRESHOLD
 
   return (
-    <div className="flex flex-col items-center pt-10 text-center">
-      <h2 className="text-xl font-extrabold text-slate-950">
-        {isReview ? 'Repaso de fallos terminado' : 'Sesión terminada'}
-      </h2>
+    <div className="flex flex-col items-center pt-6 text-center sm:pt-8">
+      <h2 className="text-xl font-bold text-sumi">{isReview ? 'Repaso de fallos terminado' : 'Sesión terminada'}</h2>
 
-      <p className="mt-8 text-6xl font-semibold leading-none text-accent">
-        {summary.correct}
-        <span className="text-3xl text-slate-300"> / {summary.total}</span>
-      </p>
-      <p className="mt-3 text-sm text-slate-500">
-        correctas a la primera ({summary.accuracyPercent}%)
-      </p>
-      <div className="mt-4 h-2 w-48 overflow-hidden rounded-full bg-slate-200">
-        <div className="h-full rounded-full bg-emerald-600" style={{ width: `${summary.accuracyPercent}%` }} />
+      {/* The score, written by the teacher in red pen, with はなまる drawn beside it. */}
+      <div className="mt-8 flex items-center gap-5">
+        <p className="font-kyokasho font-semibold leading-none text-accent">
+          <span className="text-6xl">{summary.correct}</span>
+          <span className="text-2xl"> / {summary.total}</span>
+        </p>
+        {earnedHanamaru && <Hanamaru className="h-24 w-24" />}
       </div>
+      <p className="mt-3 text-sumi-soft">
+        Correctas a la primera: <span className="font-bold tabular-nums text-sumi">{summary.accuracyPercent}%</span>
+      </p>
 
       {hasMistakes ? (
         <div className="mt-10 w-full">
-          <h3 className="mb-3 text-sm font-bold text-slate-700">Para repasar</h3>
+          <h3 className="mb-4 font-bold text-sumi">Para repasar</h3>
           <ul className="flex flex-wrap justify-center gap-2">
             {missed.map((item) => (
               <li
                 key={item.id}
-                className="flex min-w-[5.5rem] flex-col items-center rounded-lg border border-accent-border bg-accent-light px-3 py-2"
+                className="flex min-w-[5.5rem] flex-col items-center rounded-md border border-keisen bg-white px-3 py-2"
               >
-                <span className="text-lg font-semibold text-slate-800">{item.prompt}</span>
-                {item.note && <span className="text-[11px] text-slate-400">{item.note}</span>}
-                <span className="text-xs text-slate-600">{item.answer}</span>
+                <span className="font-kyokasho text-xl font-semibold text-sumi">{item.prompt}</span>
+                {item.note && <span className="text-xs text-sumi-soft">{item.note}</span>}
+                <span className="mt-0.5 font-kyokasho text-sm font-semibold text-accent">{item.answer}</span>
               </li>
             ))}
           </ul>
         </div>
       ) : (
-        <p className="mt-10 max-w-sm text-sm text-slate-500">
-          Sin fallos. Lo que has acertado tardará más en volver a salir.
-        </p>
+        <p className="mt-10 max-w-sm text-sumi-soft">Sin fallos. Lo que has acertado tardará más en volver a salir.</p>
       )}
 
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         {hasMistakes && (
-          <button
-            type="button"
-            onClick={onReviewMistakes}
-            className={`rounded-lg bg-accent px-6 py-2.5 font-bold text-white transition-colors hover:bg-accent-dark ${focusRing}`}
-          >
+          <button type="button" onClick={onReviewMistakes} className={primaryButton}>
             Repasar fallos ({missed.length})
           </button>
         )}
-        <button
-          type="button"
-          onClick={onRestart}
-          className={`rounded-lg px-6 py-2.5 font-bold transition-colors ${focusRing} ${
-            hasMistakes
-              ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              : 'bg-accent text-white hover:bg-accent-dark'
-          }`}
-        >
+        <button type="button" onClick={onRestart} className={hasMistakes ? secondaryButton : primaryButton}>
           Nueva sesión
         </button>
       </div>

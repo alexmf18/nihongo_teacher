@@ -16,14 +16,22 @@ interface StatsScreenProps {
   onRefresh: () => void
 }
 
-function ProgressBar({ percent }: { percent: number }) {
+function ProgressBar({ percent, label }: { percent: number; label: string }) {
   return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-      <div className="h-full rounded-full bg-emerald-600" style={{ width: `${percent}%` }} />
+    <div
+      className="h-1.5 w-full overflow-hidden rounded-full bg-keisen"
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percent}
+      aria-label={label}
+    >
+      <div className="h-full rounded-full bg-sumi" style={{ width: `${percent}%` }} />
     </div>
   )
 }
 
+// Laid out like a school report card (成績表): one sheet, figures in ink.
 export function StatsScreen({ stats, onRefresh }: StatsScreenProps) {
   useEffect(() => {
     onRefresh()
@@ -31,39 +39,43 @@ export function StatsScreen({ stats, onRefresh }: StatsScreenProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const summary = [
+    { label: 'Dominio general', value: `${stats.overallMasteryPercent}%` },
+    { label: 'Mejor racha', value: stats.bestStreak },
+    { label: 'Repasadas', value: stats.totalReviewed },
+  ]
+
   return (
-    <div className="flex-1 px-6 py-10">
+    <div className="flex-1 px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-3xl">
-        <h2 className="mb-1 text-center text-xl font-extrabold text-slate-950">Tu progreso</h2>
-        <p className="mb-8 text-center text-sm font-semibold text-slate-400">Repaso general</p>
+        <h2 className="text-center text-xl font-bold text-sumi">Tu progreso</h2>
+        <p className="mb-8 mt-1 text-center text-sumi-soft">Repaso general</p>
 
-        <div className="mb-8 grid grid-cols-3 gap-4">
-          <div className="rounded-xl bg-white p-5 text-center shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
-            <p className="text-3xl font-extrabold text-accent">{stats.overallMasteryPercent}%</p>
-            <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Dominio general</p>
-          </div>
-          <div className="rounded-xl bg-white p-5 text-center shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
-            <p className="text-3xl font-extrabold text-accent">{stats.bestStreak}</p>
-            <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Mejor racha</p>
-          </div>
-          <div className="rounded-xl bg-white p-5 text-center shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
-            <p className="text-3xl font-extrabold text-accent">{stats.totalReviewed}</p>
-            <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Repasadas</p>
-          </div>
-        </div>
-
-        <div className="space-y-5 rounded-xl bg-white p-6 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
-          {stats.byCategory.map((cat) => (
-            <div key={cat.category}>
-              <div className="mb-1.5 flex items-center justify-between text-sm">
-                <span className="font-bold text-slate-700">{CATEGORY_LABELS[cat.category] ?? cat.category}</span>
-                <span className="text-slate-400">
-                  {cat.mastered}/{cat.total} ({cat.masteryPercent}%)
-                </span>
+        <div className="rounded-lg border border-keisen bg-white shadow-sheet">
+          <dl className="grid grid-cols-3 divide-x divide-keisen border-b border-keisen">
+            {summary.map((item) => (
+              <div key={item.label} className="flex flex-col-reverse px-3 py-5 text-center sm:px-6">
+                <dt className="mt-1 text-sm text-sumi-soft">{item.label}</dt>
+                <dd className="font-kyokasho text-3xl font-semibold tabular-nums text-sumi">{item.value}</dd>
               </div>
-              <ProgressBar percent={cat.masteryPercent} />
-            </div>
-          ))}
+            ))}
+          </dl>
+
+          <ul className="divide-y divide-keisen">
+            {stats.byCategory.map((cat) => {
+              const label = CATEGORY_LABELS[cat.category] ?? cat.category
+              return (
+                <li key={cat.category} className="grid grid-cols-[6.5rem_1fr_8rem] items-center gap-4 px-5 py-4 sm:px-6">
+                  <span className="font-bold text-sumi">{label}</span>
+                  <ProgressBar percent={cat.masteryPercent} label={`Dominio de ${label}`} />
+                  <span className="text-right text-sm tabular-nums text-sumi-soft">
+                    {cat.mastered} de {cat.total}
+                    <span className="ml-2 inline-block w-10 font-bold text-sumi">{cat.masteryPercent}%</span>
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
         </div>
       </div>
     </div>

@@ -8,11 +8,17 @@ interface ConjugationCardProps {
 
 export function ConjugationCard({ item, formName }: ConjugationCardProps) {
   return (
-    <div className="flex flex-col items-center justify-center pb-6 pt-16 text-center">
-      <span className="block text-6xl font-semibold leading-none text-accent">{item.dictionaryForm}</span>
-      <p className="mt-3 text-sm text-slate-400">{item.meaning}</p>
-      <p className="mt-0.5 text-xs text-slate-400">{wordClassLabel(item)}</p>
-      <p className="mt-5 text-sm font-bold text-slate-600">{formLabel(formName)}</p>
+    <div className="flex flex-col items-center justify-center pb-8 pt-12 text-center sm:pt-16">
+      <span className="block font-kyokasho text-6xl font-semibold leading-none text-sumi">{item.dictionaryForm}</span>
+      <p className="mt-4 text-sumi-soft">
+        {item.meaning}
+        <span className="mx-2 text-keisen-strong" aria-hidden="true">
+          /
+        </span>
+        {wordClassLabel(item)}
+      </p>
+      {/* The question itself: which form to write. */}
+      <p className="mt-6 text-lg font-bold text-sumi">{formLabel(formName)}</p>
     </div>
   )
 }

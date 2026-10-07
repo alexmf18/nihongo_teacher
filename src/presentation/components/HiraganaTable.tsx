@@ -43,18 +43,18 @@ export function HiraganaTable() {
   const { speak } = useSpeech()
 
   return (
-    <div className="flex-1 px-6 py-10">
-      <div className="max-w-3xl mx-auto space-y-10">
+    <div className="flex-1 px-3 py-8 sm:px-6 sm:py-10">
+      <div className="mx-auto max-w-3xl space-y-10">
         <Section title="Gojuuon — 五十音 (Sonidos básicos)">
-          <TableGrid rows={GOJUUON_ROWS} cols={GOJUUON_COLS} onSpeak={speak} color="indigo" />
+          <TableGrid rows={GOJUUON_ROWS} cols={GOJUUON_COLS} onSpeak={speak} />
         </Section>
 
         <Section title="Dakuten / Handakuten — 濁点・半濁点 (Sonidos con marca)">
-          <TableGrid rows={DAKUTEN} cols={GOJUUON_COLS} onSpeak={speak} color="indigo" />
+          <TableGrid rows={DAKUTEN} cols={GOJUUON_COLS} onSpeak={speak} />
         </Section>
 
         <Section title="Yoon — 拗音 (Sonidos contraídos)">
-          <TableGrid rows={YOON_ROWS} cols={YOON_COLS} onSpeak={speak} color="indigo" />
+          <TableGrid rows={YOON_ROWS} cols={YOON_COLS} onSpeak={speak} />
         </Section>
       </div>
     </div>

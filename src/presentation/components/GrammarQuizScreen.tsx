@@ -14,7 +14,7 @@ import { RomajiInput } from './RomajiInput'
 import { ChoiceGrid } from './ChoiceGrid'
 import { ModeSwitcher } from './ModeSwitcher'
 import { Feedback } from './Feedback'
-import { QuizFrame } from './QuizFrame'
+import { QuizFrame, SessionProgress } from './QuizFrame'
 import { MissedItem, SessionSummary } from './SessionSummary'
 
 interface GrammarQuizScreenProps {
@@ -129,28 +129,19 @@ export function GrammarQuizScreen({
   if (!card) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="text-lg text-slate-400">No hay contenido disponible.</p>
+        <p className="text-lg text-sumi-soft">No hay contenido disponible.</p>
       </div>
     )
   }
 
   const isAnswered = state.feedback !== 'idle'
-  const progress = Math.max(0, Math.min(100, ((state.currentIndex + 1) / state.cards.length) * 100))
   const isChoice = state.mode === PracticeMode.MULTIPLE_CHOICE
 
   return (
     <QuizFrame>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <ModeSwitcher mode={state.mode} modes={getGrammarModes(state.kind)} onSelect={onSetMode} />
-        <div className="ml-auto flex w-fit items-center gap-3">
-          {state.isReview && <span className="text-sm font-semibold text-accent">Repasando fallos</span>}
-          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-slate-200">
-            <div className="h-full rounded-full bg-emerald-600" style={{ width: `${progress}%` }} />
-          </div>
-          <span className="text-sm font-semibold text-slate-500">
-            {state.currentIndex + 1}/{state.cards.length}
-          </span>
-        </div>
+        <SessionProgress current={state.currentIndex + 1} total={state.cards.length} isReview={state.isReview} />
       </div>
 
       <PromptCard card={card} state={state} />

@@ -8,6 +8,7 @@ interface RomajiInputProps {
   placeholder?: string
 }
 
+// The answer is written on a notebook line rather than in a boxed field.
 export function RomajiInput({ value, onChange, onSubmit, disabled, placeholder = 'Escribe el romaji...' }: RomajiInputProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -34,18 +35,23 @@ export function RomajiInput({ value, onChange, onSubmit, disabled, placeholder =
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           placeholder={placeholder}
-          className="h-[70px] w-full border-2 border-input-border bg-white px-5 text-center text-2xl font-bold text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-accent disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50"
+          aria-label="Tu respuesta"
+          className="h-16 w-full border-0 border-b-2 border-keisen-strong bg-transparent px-2 text-center text-2xl font-medium text-sumi outline-none transition-colors placeholder:text-base placeholder:font-normal placeholder:text-sumi-soft focus:border-sumi focus-visible:outline-none disabled:cursor-not-allowed disabled:text-sumi-soft sm:text-3xl"
           autoComplete="off"
+          autoCapitalize="off"
+          spellCheck={false}
           autoFocus
         />
-        <button
-          type="submit"
-          disabled={disabled || !value.trim()}
-          className="flex h-[56px] min-w-[230px] items-center justify-center gap-3 rounded-lg bg-accent px-8 text-base font-bold text-white transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
-        >
-          Comprobar
-          <span aria-hidden="true" className="text-2xl leading-none">→</span>
-        </button>
+        {/* Once answered the feedback below takes over with "Siguiente". */}
+        {!disabled && (
+          <button
+            type="submit"
+            disabled={!value.trim()}
+            className="h-12 min-w-[200px] rounded-md bg-sumi px-8 text-base font-bold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-keisen disabled:text-sumi-soft"
+          >
+            Comprobar
+          </button>
+        )}
       </div>
     </form>
   )

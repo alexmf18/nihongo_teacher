@@ -6,14 +6,15 @@ interface ParticleSentenceCardProps {
 
 export function ParticleSentenceCard({ item }: ParticleSentenceCardProps) {
   return (
-    <div className="flex flex-col items-center justify-center pb-6 pt-16 text-center">
-      <p className="max-w-lg text-3xl font-semibold leading-relaxed text-slate-800">
+    <div className="flex flex-col items-center justify-center pb-8 pt-12 text-center sm:pt-16">
+      <p className="max-w-lg font-kyokasho text-3xl font-semibold leading-relaxed text-sumi sm:text-[2.5rem]">
         {item.sentenceParts[0]}
-        <span className="mx-2 inline-block min-w-[2.5rem] border-b-4 border-accent">&nbsp;</span>
+        {/* The blank is an empty practice square, waiting for the particle. */}
+        <span className="tianzige mx-2 inline-block h-[1.3em] w-[1.3em] align-middle" role="img" aria-label="hueco" />
         {item.sentenceParts[1]}
       </p>
-      <p className="mt-4 text-sm text-slate-400">{item.translation}</p>
-      <p className="mt-5 text-xs font-bold uppercase tracking-[0.24em] text-slate-300">Partícula</p>
+      <p className="mt-4 text-sumi-soft">{item.translation}</p>
+      <p className="mt-5 text-sm text-sumi-soft">Partícula</p>
     </div>
   )
 }

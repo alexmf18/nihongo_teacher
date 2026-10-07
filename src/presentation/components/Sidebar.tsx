@@ -10,167 +10,145 @@ import { STATS_SCREEN_KEY, StatsScreenKey } from '../../domain/entities/StatsScr
 interface SidebarProps {
   selected: CharacterCategory | GrammarScreen | StatsScreenKey
   selectedPhrase?: PhraseCategory
+  // Below the lg breakpoint the sidebar is an off-canvas drawer.
+  open: boolean
+  onClose: () => void
   onSelect: (category: CharacterCategory) => void
   onSelectPhrase: (subCategory: PhraseCategory) => void
   onSelectGrammar: (screen: GrammarScreen) => void
   onSelectStats: () => void
 }
 
-type SidebarIcon = 'kana' | 'katakana' | 'book' | 'kanji' | 'words' | 'phrase' | 'number' | 'stats'
+// Each entry is marked by the character it is about, like a seal: あ for hiragana,
+// 漢 for kanji, 活 (活用, conjugation) for verbs, 個 for counters…
+interface NavItem {
+  key: string
+  label: string
+  glyph: string
+}
 
-const learningCategories = [
-  { key: CharacterCategory.HIRAGANA_TABLE, label: 'Tabla Hiragana', icon: 'book' },
-  { key: CharacterCategory.KATAKANA_TABLE, label: 'Tabla Katakana', icon: 'book' },
-  { key: CharacterCategory.KANJI_TABLE, label: 'Tabla Kanji', icon: 'book' },
-  { key: CharacterCategory.NUMBER_TABLE, label: 'Tabla de Números', icon: 'number' },
-  { key: CharacterCategory.WORD_TABLE, label: 'Tabla de Palabras', icon: 'words' },
-  { key: CharacterCategory.PHRASE_TABLE, label: 'Tabla de Frases', icon: 'phrase' },
-] satisfies { key: CharacterCategory; label: string; icon: SidebarIcon }[]
+const learningCategories: NavItem[] = [
+  { key: CharacterCategory.HIRAGANA_TABLE, label: 'Tabla Hiragana', glyph: 'あ' },
+  { key: CharacterCategory.KATAKANA_TABLE, label: 'Tabla Katakana', glyph: 'ア' },
+  { key: CharacterCategory.KANJI_TABLE, label: 'Tabla Kanji', glyph: '漢' },
+  { key: CharacterCategory.NUMBER_TABLE, label: 'Tabla de Números', glyph: '数' },
+  { key: CharacterCategory.WORD_TABLE, label: 'Tabla de Palabras', glyph: '語' },
+  { key: CharacterCategory.PHRASE_TABLE, label: 'Tabla de Frases', glyph: '文' },
+]
 
-const practiceCategories = [
-  { key: CharacterCategory.HIRAGANA, label: 'Hiragana', icon: 'kana' },
-  { key: CharacterCategory.KATAKANA, label: 'Katakana', icon: 'katakana' },
-  { key: CharacterCategory.KANJI, label: 'Kanji', icon: 'kanji' },
-  { key: CharacterCategory.WORD, label: 'Palabras', icon: 'words' },
-  { key: CharacterCategory.PHRASE, label: 'Frases', icon: 'phrase' },
-  { key: CharacterCategory.NUMBER, label: 'Números', icon: 'number' },
-] satisfies { key: CharacterCategory; label: string; icon: SidebarIcon }[]
+const practiceCategories: NavItem[] = [
+  { key: CharacterCategory.HIRAGANA, label: 'Hiragana', glyph: 'あ' },
+  { key: CharacterCategory.KATAKANA, label: 'Katakana', glyph: 'ア' },
+  { key: CharacterCategory.KANJI, label: 'Kanji', glyph: '漢' },
+  { key: CharacterCategory.WORD, label: 'Palabras', glyph: '語' },
+  { key: CharacterCategory.PHRASE, label: 'Frases', glyph: '文' },
+  { key: CharacterCategory.NUMBER, label: 'Números', glyph: '数' },
+]
 
-const grammarCategories = [
-  { key: GrammarScreen.PARTICLE_TABLE, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.PARTICLE_TABLE], icon: 'phrase' },
-  { key: GrammarScreen.PARTICLE_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.PARTICLE_QUIZ], icon: 'phrase' },
-  { key: GrammarScreen.CONJUGATION_TABLE, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.CONJUGATION_TABLE], icon: 'kanji' },
-  { key: GrammarScreen.CONJUGATION_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.CONJUGATION_QUIZ], icon: 'kanji' },
-  { key: GrammarScreen.ADJECTIVE_TABLE, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.ADJECTIVE_TABLE], icon: 'words' },
-  { key: GrammarScreen.ADJECTIVE_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.ADJECTIVE_QUIZ], icon: 'words' },
-  { key: GrammarScreen.COUNTER_TABLE, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.COUNTER_TABLE], icon: 'number' },
-  { key: GrammarScreen.COUNTER_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.COUNTER_QUIZ], icon: 'number' },
-  { key: GrammarScreen.SENTENCE_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.SENTENCE_QUIZ], icon: 'phrase' },
-] satisfies { key: GrammarScreen; label: string; icon: SidebarIcon }[]
+const GRAMMAR_GLYPHS: Record<GrammarScreen, string> = {
+  [GrammarScreen.PARTICLE_TABLE]: 'は',
+  [GrammarScreen.PARTICLE_QUIZ]: 'は',
+  [GrammarScreen.CONJUGATION_TABLE]: '活',
+  [GrammarScreen.CONJUGATION_QUIZ]: '活',
+  [GrammarScreen.ADJECTIVE_TABLE]: '形',
+  [GrammarScreen.ADJECTIVE_QUIZ]: '形',
+  [GrammarScreen.COUNTER_TABLE]: '個',
+  [GrammarScreen.COUNTER_QUIZ]: '個',
+  [GrammarScreen.SENTENCE_QUIZ]: '並',
+}
 
-const statsCategories = [
-  { key: STATS_SCREEN_KEY, label: 'Mi progreso', icon: 'stats' },
-] satisfies { key: StatsScreenKey; label: string; icon: SidebarIcon }[]
+const grammarCategories: NavItem[] = Object.values(GrammarScreen).map((screen) => ({
+  key: screen,
+  label: GRAMMAR_SCREEN_LABELS[screen],
+  glyph: GRAMMAR_GLYPHS[screen],
+}))
+
+const statsCategories: NavItem[] = [{ key: STATS_SCREEN_KEY, label: 'Mi progreso', glyph: '進' }]
 
 const phraseSubCategories = Object.values(PhraseCategory)
 
-function Icon({ name }: { name: SidebarIcon }) {
-  const className = 'h-6 w-6 shrink-0'
-
-  if (name === 'kana') return <span className="w-6 text-center text-lg font-semibold leading-none">あ</span>
-  if (name === 'kanji') return <span className="w-6 text-center text-lg font-semibold leading-none">漢</span>
-  if (name === 'words') return <span className="w-6 text-center text-lg font-semibold leading-none">詞</span>
-
-  if (name === 'katakana') {
-    return (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M4 5h11M9 5c-.2 6.3-1.8 10.8-5 14M14 10l6 9M17.5 10l-7 9" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    )
-  }
-
-  if (name === 'book') {
-    return (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M4 5.5c2.8-1 5-.7 8 1v13c-3-1.7-5.2-2-8-1V5.5ZM12 6.5c3-1.7 5.2-2 8-1v13c-2.8-1-5-.7-8 1v-13Z" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    )
-  }
-
-  if (name === 'phrase') {
-    return (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M6 4h9l3 3v13H6V4Z" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M14 4v4h4M9 12h6M9 16h5" strokeLinecap="round" />
-      </svg>
-    )
-  }
-
-  if (name === 'number') {
-    return (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M8 4 6 20M18 4l-2 16M4 9h17M3 15h17" strokeLinecap="round" />
-      </svg>
-    )
-  }
-
-  if (name === 'stats') {
-    return (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M5 20V10M12 20V4M19 20v-7" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    )
-  }
-
-  return null
-}
-
 function CategorySection({
   title,
-  cats,
+  items,
   selected,
-  onCatClick,
+  onItemClick,
   phrasesOpen,
   selectedPhrase,
   onSelectPhrase,
 }: {
   title: string
-  cats: { key: string; label: string; icon: SidebarIcon }[]
+  items: NavItem[]
   selected: string
-  onCatClick: (key: string) => void
+  onItemClick: (key: string) => void
   phrasesOpen: boolean
   selectedPhrase?: PhraseCategory
   onSelectPhrase: (sub: PhraseCategory) => void
 }) {
   return (
-    <>
-      <p className="px-5 pb-2 pt-5 text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400 first:pt-0">
-        {title}
-      </p>
-      {cats.map((cat) => {
-        const isActive = selected === cat.key
-        return (
-          <div key={cat.key}>
-            <button
-              onClick={() => onCatClick(cat.key)}
-              className={`flex w-full items-center gap-4 rounded-lg px-5 py-3 text-left text-[15px] transition-colors ${
-                isActive
-                  ? 'bg-accent-soft text-accent'
-                  : 'text-slate-500 hover:bg-white hover:text-slate-950'
-              }`}
-            >
-              <Icon name={cat.icon} />
-              <span className="font-medium">{cat.label}</span>
-            </button>
+    <section className="pt-6 first:pt-0">
+      <h2 className="px-3 pb-1.5 text-xs font-bold text-sumi-soft">{title}</h2>
+      <ul className="space-y-0.5">
+        {items.map((item) => {
+          const isActive = selected === item.key
+          return (
+            <li key={item.key}>
+              <button
+                onClick={() => onItemClick(item.key)}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-left text-[15px] transition-colors ${
+                  isActive ? 'bg-white font-bold text-sumi' : 'text-sumi-soft hover:bg-white/70 hover:text-sumi'
+                }`}
+              >
+                {/* The current item gets the red seal. */}
+                <span
+                  aria-hidden="true"
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] font-kyokasho text-[15px] font-semibold leading-none transition-colors ${
+                    isActive ? 'bg-accent text-white' : 'border border-keisen-strong bg-papel text-sumi'
+                  }`}
+                >
+                  {item.glyph}
+                </span>
+                <span>{item.label}</span>
+              </button>
 
-            {cat.key === CharacterCategory.PHRASE && phrasesOpen && (
-              <div className="mb-1 ml-8 mt-1 space-y-1 border-l border-accent-border pl-3">
-                {phraseSubCategories.map((sub) => {
-                  const isSubActive = selectedPhrase === sub
-                  return (
-                    <button
-                      key={sub}
-                      onClick={() => onSelectPhrase(sub)}
-                      className={`w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${
-                        isSubActive
-                          ? 'bg-white text-accent shadow-sm'
-                          : 'text-slate-400 hover:bg-white hover:text-slate-700'
-                      }`}
-                    >
-                      {PHRASE_CATEGORY_LABELS[sub]}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </>
+              {item.key === CharacterCategory.PHRASE && phrasesOpen && (
+                <ul className="mb-1 ml-[1.625rem] mt-0.5 space-y-0.5 border-l border-keisen-strong pl-3">
+                  {phraseSubCategories.map((sub) => {
+                    const isSubActive = selectedPhrase === sub
+                    return (
+                      <li key={sub}>
+                        <button
+                          onClick={() => onSelectPhrase(sub)}
+                          aria-current={isSubActive ? 'page' : undefined}
+                          className={`w-full rounded-md px-3 py-1.5 text-left text-sm transition-colors ${
+                            isSubActive ? 'bg-white font-bold text-accent' : 'text-sumi-soft hover:bg-white/70 hover:text-sumi'
+                          }`}
+                        >
+                          {PHRASE_CATEGORY_LABELS[sub]}
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+    </section>
   )
 }
 
-export function Sidebar({ selected, selectedPhrase, onSelect, onSelectPhrase, onSelectGrammar, onSelectStats }: SidebarProps) {
+export function Sidebar({
+  selected,
+  selectedPhrase,
+  open,
+  onClose,
+  onSelect,
+  onSelectPhrase,
+  onSelectGrammar,
+  onSelectStats,
+}: SidebarProps) {
   const [phrasesOpen, setPhrasesOpen] = useState(selected === CharacterCategory.PHRASE)
 
   const handleCategoryClick = (key: string) => {
@@ -182,64 +160,88 @@ export function Sidebar({ selected, selectedPhrase, onSelect, onSelectPhrase, on
         if (phraseSubCategories.length > 0) {
           onSelectPhrase(phraseSubCategories[0])
         }
-      } else {
-        setPhrasesOpen(false)
       }
+      // Keep the drawer open so a phrase topic can be picked next.
       return
     }
     setPhrasesOpen(false)
     onSelect(key as CharacterCategory)
+    onClose()
+  }
+
+  const handleSelectPhrase = (sub: PhraseCategory) => {
+    onSelectPhrase(sub)
+    onClose()
   }
 
   const handleGrammarClick = (key: string) => {
     setPhrasesOpen(false)
     onSelectGrammar(key as GrammarScreen)
+    onClose()
   }
 
   const handleStatsClick = () => {
     setPhrasesOpen(false)
     onSelectStats()
+    onClose()
   }
 
   return (
-    <aside className="flex h-screen w-[280px] shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-sidebar-bg">
-      <div className="px-8 pb-9 pt-10">
-        <h1 className="font-serif text-[28px] font-bold leading-none text-accent">Nihongo Teacher</h1>
-        <p className="mt-2 text-[13px] font-semibold uppercase tracking-[0.26em] text-slate-700">Repaso de japones</p>
+    <aside
+      id="app-navigation"
+      className={`fixed inset-y-0 left-0 z-40 flex h-[100dvh] w-[280px] shrink-0 flex-col overflow-y-auto border-r border-keisen bg-papel-deep transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:static lg:translate-x-0 ${
+        open ? 'translate-x-0 shadow-sheet' : '-translate-x-full'
+      }`}
+    >
+      <div className="flex items-start justify-between px-6 pb-7 pt-8">
+        <div>
+          <p className="whitespace-nowrap font-kyokasho text-2xl font-semibold leading-none text-sumi">Nihongo Teacher</p>
+          <p className="mt-2 text-sm text-sumi-soft">Repaso de japonés</p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="-mr-2 rounded-md p-2 text-sumi-soft hover:text-sumi lg:hidden"
+          aria-label="Cerrar menú"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
+          </svg>
+        </button>
       </div>
 
-      <nav className="flex-1 space-y-1 px-4">
+      <nav className="flex-1 px-3 pb-8" aria-label="Secciones">
         <CategorySection
           title="Aprendizaje"
-          cats={learningCategories}
+          items={learningCategories}
           selected={selected}
-          onCatClick={handleCategoryClick}
+          onItemClick={handleCategoryClick}
           phrasesOpen={phrasesOpen}
           selectedPhrase={selectedPhrase}
-          onSelectPhrase={onSelectPhrase}
+          onSelectPhrase={handleSelectPhrase}
         />
         <CategorySection
           title="Práctica"
-          cats={practiceCategories}
+          items={practiceCategories}
           selected={selected}
-          onCatClick={handleCategoryClick}
+          onItemClick={handleCategoryClick}
           phrasesOpen={phrasesOpen}
           selectedPhrase={selectedPhrase}
-          onSelectPhrase={onSelectPhrase}
+          onSelectPhrase={handleSelectPhrase}
         />
         <CategorySection
           title="Gramática"
-          cats={grammarCategories}
+          items={grammarCategories}
           selected={selected}
-          onCatClick={handleGrammarClick}
+          onItemClick={handleGrammarClick}
           phrasesOpen={false}
           onSelectPhrase={() => {}}
         />
         <CategorySection
           title="Progreso"
-          cats={statsCategories}
+          items={statsCategories}
           selected={selected}
-          onCatClick={handleStatsClick}
+          onItemClick={handleStatsClick}
           phrasesOpen={false}
           onSelectPhrase={() => {}}
         />

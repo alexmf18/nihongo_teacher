@@ -1,4 +1,5 @@
 import { useSpeech } from '../hooks/useSpeech'
+import { RefGroup, RefPage, SpeakableText, refCard } from './ReferenceLayout'
 
 interface PhraseEntry {
   japanese: string
@@ -73,20 +74,14 @@ const PHRASE_GROUPS: PhraseGroup[] = [
 
 function PhraseCard({ entry, onSpeak }: { entry: PhraseEntry; onSpeak: (text: string) => void }) {
   return (
-    <div className="flex w-64 flex-col items-center rounded-lg border border-accent-border bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)] transition-colors hover:border-accent hover:bg-accent-light">
-      <button
-        onClick={() => onSpeak(entry.japanese)}
-        className="mb-2 cursor-pointer text-center text-xl font-semibold leading-snug text-accent transition-transform hover:scale-105"
-        title="Escuchar pronunciacion"
-      >
-        {entry.japanese}
-      </button>
-      <span className="mb-1 text-center text-xs leading-tight text-slate-400">{entry.romaji}</span>
-      <span className="mt-1 text-center text-sm font-bold text-slate-600">{entry.meaning}</span>
+    <div className={`flex w-64 flex-col items-center text-center ${refCard}`}>
+      <SpeakableText text={entry.japanese} onSpeak={onSpeak} className="text-xl leading-snug" />
+      <span className="mt-1.5 text-xs leading-tight text-sumi-soft">{entry.romaji}</span>
+      <span className="mt-2 text-sm font-bold text-sumi">{entry.meaning}</span>
       {entry.exampleSentence && (
-        <div className="mt-2 border-t border-slate-100 pt-2 text-center">
-          <p className="text-[11px] leading-snug text-slate-500">{entry.exampleSentence.japanese}</p>
-          <p className="mt-0.5 text-[10px] italic leading-snug text-slate-400">{entry.exampleSentence.translation}</p>
+        <div className="mt-3 w-full border-t border-dashed border-keisen-strong pt-2.5">
+          <p className="font-kyokasho text-sm leading-snug text-sumi">{entry.exampleSentence.japanese}</p>
+          <p className="mt-1 text-xs leading-snug text-sumi-soft">{entry.exampleSentence.translation}</p>
         </div>
       )}
     </div>
@@ -97,20 +92,14 @@ export function PhraseTable() {
   const { speak } = useSpeech()
 
   return (
-    <div className="flex-1 px-6 py-10">
-      <div className="max-w-5xl mx-auto space-y-10">
-        {PHRASE_GROUPS.map((group) => (
-          <div key={group.title} className="mb-8">
-            <h2 className="mb-1 text-center text-xl font-extrabold text-slate-950">{group.title}</h2>
-            <p className="mb-4 text-center text-sm font-semibold text-slate-400">{group.subtitle}</p>
-            <div className="flex flex-wrap justify-center gap-3">
-              {group.entries.map((entry) => (
-                <PhraseCard key={`${group.title}-${entry.japanese}`} entry={entry} onSpeak={speak} />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <RefPage>
+      {PHRASE_GROUPS.map((group) => (
+        <RefGroup key={group.title} title={group.title} subtitle={group.subtitle}>
+          {group.entries.map((entry) => (
+            <PhraseCard key={`${group.title}-${entry.japanese}`} entry={entry} onSpeak={speak} />
+          ))}
+        </RefGroup>
+      ))}
+    </RefPage>
   )
 }

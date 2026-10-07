@@ -7,8 +7,6 @@ interface SentenceBuilderProps {
   onSubmit: (answer: string) => void
 }
 
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
-
 // Tile indices in a random order that is never already the solution.
 function scrambledOrder(count: number): number[] {
   const identity = Array.from({ length: count }, (_, i) => i)
@@ -31,11 +29,11 @@ export function SentenceBuilder({ chunks, disabled, onSubmit }: SentenceBuilderP
   return (
     <div className="flex flex-col items-center gap-6">
       <div
-        className="flex min-h-[68px] w-full flex-wrap items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-200 p-3"
+        className="flex min-h-[68px] w-full flex-wrap items-end justify-center gap-2 border-b-2 border-keisen-strong px-2 pb-3"
         aria-label="Tu frase"
       >
         {placed.length === 0 ? (
-          <span className="text-sm text-slate-400">Toca los bloques en orden</span>
+          <span className="pb-2 text-sm text-sumi-soft">Toca los bloques en orden</span>
         ) : (
           placed.map((index) => (
             <button
@@ -43,7 +41,7 @@ export function SentenceBuilder({ chunks, disabled, onSubmit }: SentenceBuilderP
               type="button"
               disabled={disabled}
               onClick={() => remove(index)}
-              className={`rounded-md bg-accent-light px-3 py-2 text-xl font-semibold text-slate-800 ring-1 ring-accent-border transition-colors hover:ring-accent disabled:cursor-default disabled:hover:ring-accent-border ${focusRing}`}
+              className="rounded-md border border-keisen bg-papel px-3 py-1.5 font-kyokasho text-2xl font-semibold text-sumi transition-colors hover:border-sumi disabled:cursor-default disabled:hover:border-keisen"
             >
               {chunks[index]}
             </button>
@@ -65,7 +63,7 @@ export function SentenceBuilder({ chunks, disabled, onSubmit }: SentenceBuilderP
                 aria-hidden={isPlaced}
                 tabIndex={isPlaced ? -1 : undefined}
                 // Placed tiles keep their slot so the bank doesn't reflow under the cursor.
-                className={`rounded-md bg-white px-3 py-2 text-xl font-semibold text-slate-800 ring-1 ring-slate-200 transition-colors hover:ring-accent ${focusRing} ${
+                className={`rounded-md border border-keisen-strong bg-white px-3 py-1.5 font-kyokasho text-2xl font-semibold text-sumi transition-colors hover:border-sumi ${
                   isPlaced ? 'invisible' : ''
                 }`}
               >
@@ -82,7 +80,7 @@ export function SentenceBuilder({ chunks, disabled, onSubmit }: SentenceBuilderP
             <button
               type="button"
               onClick={() => setPlaced([])}
-              className={`rounded-md text-sm font-semibold text-slate-500 hover:text-slate-800 ${focusRing}`}
+              className="rounded-md text-sm font-bold text-sumi-soft hover:text-sumi"
             >
               Borrar
             </button>
@@ -91,7 +89,7 @@ export function SentenceBuilder({ chunks, disabled, onSubmit }: SentenceBuilderP
             type="button"
             disabled={!isComplete}
             onClick={() => onSubmit(placed.map((i) => chunks[i]).join(''))}
-            className={`flex h-[56px] min-w-[230px] items-center justify-center rounded-lg bg-accent px-8 text-base font-bold text-white transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 ${focusRing}`}
+            className="h-12 min-w-[200px] rounded-md bg-sumi px-8 text-base font-bold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:bg-keisen disabled:text-sumi-soft"
           >
             Comprobar
           </button>

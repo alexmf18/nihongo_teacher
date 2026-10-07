@@ -5,7 +5,7 @@ import { RomajiInput } from './RomajiInput'
 import { ChoiceGrid } from './ChoiceGrid'
 import { ModeSwitcher } from './ModeSwitcher'
 import { Feedback } from './Feedback'
-import { QuizFrame } from './QuizFrame'
+import { QuizFrame, SessionProgress } from './QuizFrame'
 import { SessionSummary } from './SessionSummary'
 import { KanaRowPicker } from './KanaRowPicker'
 import { KanaRow } from '../../domain/entities/KanaRow'
@@ -69,13 +69,12 @@ export function QuizScreen({
   if (!character) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="text-lg text-slate-400">No hay caracteres disponibles.</p>
+        <p className="text-lg text-sumi-soft">No hay caracteres disponibles.</p>
       </div>
     )
   }
 
   const isAnswered = state.feedback !== 'idle'
-  const progress = Math.max(0, Math.min(100, ((state.currentIndex + 1) / state.characters.length) * 100))
   const isReverse = state.mode === PracticeMode.REVERSE
   const isListening = state.mode === PracticeMode.LISTENING
   const isChoice = state.mode === PracticeMode.MULTIPLE_CHOICE
@@ -91,15 +90,7 @@ export function QuizScreen({
     <QuizFrame>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <ModeSwitcher mode={state.mode} modes={getAvailableModes(state.category)} onSelect={onSetMode} />
-        <div className="ml-auto flex w-fit items-center gap-3">
-          {state.isReview && <span className="text-sm font-semibold text-accent">Repasando fallos</span>}
-          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-slate-200">
-            <div className="h-full rounded-full bg-emerald-600" style={{ width: `${progress}%` }} />
-          </div>
-          <span className="text-sm font-semibold text-slate-500">
-            {state.currentIndex + 1}/{state.characters.length}
-          </span>
-        </div>
+        <SessionProgress current={state.currentIndex + 1} total={state.characters.length} isReview={state.isReview} />
       </div>
 
       {isKanaCategory(state.category) && (
@@ -110,7 +101,9 @@ export function QuizScreen({
         displayText={isReverse ? character.meaning ?? character.character : character.character}
         speakText={character.character}
         category={state.category}
+        lang={isReverse && character.meaning ? 'es' : 'ja'}
         hidden={isListening && !isAnswered}
+        mark={state.feedback === 'idle' ? null : state.feedback}
       />
 
       <div className="mx-auto mt-2 w-full max-w-[490px]">
@@ -137,6 +130,7 @@ export function QuizScreen({
         showAnswer={state.showAnswer}
         correctAnswerLabel={correctAnswerLabel}
         contextLine={contextLine}
+        showMark={false}
         onNext={onNext}
         onReveal={onReveal}
         onTryAgain={onTryAgain}
