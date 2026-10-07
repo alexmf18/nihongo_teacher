@@ -38,6 +38,13 @@ describe('GetGrammarPracticeDeck', () => {
     deck.forEach((card) => expect(card.kind).toBe(GrammarCategory.PARTICLE))
   })
 
+  it('caps the deck at the given limit', () => {
+    const progressRepo = new InMemoryProgressRepository()
+    const useCase = new GetGrammarPracticeDeck(grammarRepo, progressRepo)
+
+    expect(useCase.execute(GrammarCategory.CONJUGATION, Date.now(), 4)).toHaveLength(4)
+  })
+
   it('builds one card per conjugation form (not per verb)', () => {
     const progressRepo = new InMemoryProgressRepository()
     const useCase = new GetGrammarPracticeDeck(grammarRepo, progressRepo)

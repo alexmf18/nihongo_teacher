@@ -1,19 +1,99 @@
 import { GrammarQuizState } from '../hooks/useGrammarQuiz'
 import { GrammarCategory } from '../../domain/entities/GrammarItem'
 import { GrammarCard } from '../../domain/entities/GrammarCard'
+import { getGrammarModes, PracticeMode } from '../../domain/entities/PracticeMode'
+import { correctAnswerFor } from '../../domain/services/grammarAnswer'
+import { summarizeSession } from '../../domain/services/summarizeSession'
 import { ParticleSentenceCard } from './ParticleSentenceCard'
 import { ConjugationCard } from './ConjugationCard'
+import { formLabel } from '../../domain/entities/ConjugationFormLabels'
+import { CounterPromptCard } from './CounterPromptCard'
+import { SentencePromptCard } from './SentencePromptCard'
+import { SentenceBuilder } from './SentenceBuilder'
 import { RomajiInput } from './RomajiInput'
+import { ChoiceGrid } from './ChoiceGrid'
+import { ModeSwitcher } from './ModeSwitcher'
 import { Feedback } from './Feedback'
+import { QuizFrame } from './QuizFrame'
+import { MissedItem, SessionSummary } from './SessionSummary'
 
 interface GrammarQuizScreenProps {
   state: GrammarQuizState
   card: GrammarCard | null
   onAnswerChange: (value: string) => void
   onSubmit: () => void
+  onSelectChoice: (choice: string) => void
+  onSetMode: (mode: PracticeMode) => void
   onNext: () => void
   onReveal: () => void
   onTryAgain: () => void
+  onReviewMistakes: () => void
+  onRestart: () => void
+}
+
+const PLACEHOLDERS: Record<GrammarCategory, string> = {
+  [GrammarCategory.PARTICLE]: 'Escribe la partícula...',
+  [GrammarCategory.CONJUGATION]: 'Escribe la respuesta...',
+  [GrammarCategory.ADJECTIVE]: 'Escribe la respuesta...',
+  [GrammarCategory.COUNTER]: 'Escribe la lectura...',
+  [GrammarCategory.SENTENCE]: '',
+}
+
+function counterRomaji(card: Extract<GrammarCard, { kind: GrammarCategory.COUNTER }>): string {
+  return card.item.examples.find((e) => e.number === card.number)?.romaji ?? ''
+}
+
+// What the feedback card shows as the answer; counters add the romaji reading and
+// sentences keep their chunks apart so they read like the tiles.
+function answerLabelFor(card: GrammarCard): string {
+  if (card.kind === GrammarCategory.SENTENCE) return card.item.chunks.join(' ')
+  const answer = correctAnswerFor(card)
+  return card.kind === GrammarCategory.COUNTER ? `${answer} (${counterRomaji(card)})` : answer
+}
+
+function contextLineFor(card: GrammarCard): string | undefined {
+  // The sentence prompt card already shows the translation once answered.
+  if (card.kind === GrammarCategory.SENTENCE) return undefined
+  if (card.kind === GrammarCategory.PARTICLE) return card.item.translation
+  if (card.kind === GrammarCategory.COUNTER) return card.item.usage
+  return card.item.meaning
+}
+
+function toMissedItem(card: GrammarCard): MissedItem {
+  if (card.kind === GrammarCategory.PARTICLE) {
+    return {
+      id: card.id,
+      prompt: `${card.item.sentenceParts[0]}＿${card.item.sentenceParts[1]}`,
+      answer: correctAnswerFor(card),
+    }
+  }
+  if (card.kind === GrammarCategory.COUNTER) {
+    return { id: card.id, prompt: `${card.number}${card.item.counter}`, answer: correctAnswerFor(card) }
+  }
+  if (card.kind === GrammarCategory.SENTENCE) {
+    return { id: card.id, prompt: correctAnswerFor(card), answer: card.item.translation }
+  }
+  return {
+    id: card.id,
+    prompt: card.item.dictionaryForm,
+    note: formLabel(card.formName),
+    answer: correctAnswerFor(card),
+  }
+}
+
+function PromptCard({ card, state }: { card: GrammarCard; state: GrammarQuizState }) {
+  if (card.kind === GrammarCategory.PARTICLE) return <ParticleSentenceCard item={card.item} />
+  if (card.kind === GrammarCategory.SENTENCE) {
+    return (
+      <SentencePromptCard
+        item={card.item}
+        dictation={state.mode === PracticeMode.LISTENING}
+        answered={state.feedback !== 'idle'}
+      />
+    )
+  }
+  if (card.kind === GrammarCategory.COUNTER) return <CounterPromptCard item={card.item} number={card.number} />
+  return <ConjugationCard item={card.item} formName={card.formName} />
 }
 
 export function GrammarQuizScreen({
@@ -21,10 +101,31 @@ export function GrammarQuizScreen({
   card,
   onAnswerChange,
   onSubmit,
+  onSelectChoice,
+  onSetMode,
   onNext,
   onReveal,
   onTryAgain,
+  onReviewMistakes,
+  onRestart,
 }: GrammarQuizScreenProps) {
+  if (state.finished) {
+    const summary = summarizeSession(state.sessionAnswers)
+    const failedIds = new Set(summary.failedIds)
+
+    return (
+      <QuizFrame>
+        <SessionSummary
+          summary={summary}
+          missed={state.cards.filter((c) => failedIds.has(c.id)).map(toMissedItem)}
+          isReview={state.isReview}
+          onReviewMistakes={onReviewMistakes}
+          onRestart={onRestart}
+        />
+      </QuizFrame>
+    )
+  }
+
   if (!card) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -35,54 +136,62 @@ export function GrammarQuizScreen({
 
   const isAnswered = state.feedback !== 'idle'
   const progress = Math.max(0, Math.min(100, ((state.currentIndex + 1) / state.cards.length) * 100))
-  const isParticle = card.kind === GrammarCategory.PARTICLE
-
-  const correctAnswerLabel = isParticle
-    ? card.item.particle
-    : card.item.forms.find((f) => f.formName === card.formName)?.value ?? ''
-
-  const contextLine = isParticle ? card.item.translation : card.item.meaning
+  const isChoice = state.mode === PracticeMode.MULTIPLE_CHOICE
 
   return (
-    <div className="flex min-h-full flex-1 items-center justify-center px-8 py-10 lg:px-16">
-      <section className="mx-auto w-full max-w-[760px]">
-        <div className="min-h-[520px] rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_14px_35px_rgba(15,23,42,0.06)] ring-1 ring-slate-100">
-          <div className="ml-auto flex w-fit items-center gap-3">
-            <div className="h-1.5 w-28 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full rounded-full bg-emerald-600" style={{ width: `${progress}%` }} />
-            </div>
-            <span className="text-sm font-semibold text-slate-500">
-              {state.currentIndex + 1}/{state.cards.length}
-            </span>
+    <QuizFrame>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <ModeSwitcher mode={state.mode} modes={getGrammarModes(state.kind)} onSelect={onSetMode} />
+        <div className="ml-auto flex w-fit items-center gap-3">
+          {state.isReview && <span className="text-sm font-semibold text-accent">Repasando fallos</span>}
+          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-slate-200">
+            <div className="h-full rounded-full bg-emerald-600" style={{ width: `${progress}%` }} />
           </div>
-
-          {isParticle ? (
-            <ParticleSentenceCard item={card.item} />
-          ) : (
-            <ConjugationCard item={card.item} formName={card.formName} />
-          )}
-
-          <div className="mx-auto mt-2 w-full max-w-[490px]">
-            <RomajiInput
-              value={state.answer}
-              onChange={onAnswerChange}
-              onSubmit={onSubmit}
-              disabled={isAnswered}
-              placeholder={isParticle ? 'Escribe la partícula...' : 'Escribe la respuesta...'}
-            />
-          </div>
-
-          <Feedback
-            feedback={state.feedback}
-            showAnswer={state.showAnswer}
-            correctAnswerLabel={correctAnswerLabel}
-            contextLine={contextLine}
-            onNext={onNext}
-            onReveal={onReveal}
-            onTryAgain={onTryAgain}
-          />
+          <span className="text-sm font-semibold text-slate-500">
+            {state.currentIndex + 1}/{state.cards.length}
+          </span>
         </div>
-      </section>
-    </div>
+      </div>
+
+      <PromptCard card={card} state={state} />
+
+      <div className={`mx-auto mt-2 w-full ${card.kind === GrammarCategory.SENTENCE ? 'max-w-[620px]' : 'max-w-[490px]'}`}>
+        {card.kind === GrammarCategory.SENTENCE ? (
+          <SentenceBuilder
+            // A fresh builder per presented card, so placed tiles never carry over.
+            key={`${state.deckId}:${state.currentIndex}:${state.mode}`}
+            chunks={card.item.chunks}
+            disabled={isAnswered}
+            onSubmit={onSelectChoice}
+          />
+        ) : isChoice ? (
+          <ChoiceGrid
+            options={(state.choices ?? []).map((choice) => ({ id: choice, label: choice }))}
+            selectedId={state.answer || undefined}
+            correctId={correctAnswerFor(card)}
+            disabled={isAnswered}
+            onSelect={onSelectChoice}
+          />
+        ) : (
+          <RomajiInput
+            value={state.answer}
+            onChange={onAnswerChange}
+            onSubmit={onSubmit}
+            disabled={isAnswered}
+            placeholder={PLACEHOLDERS[card.kind]}
+          />
+        )}
+      </div>
+
+      <Feedback
+        feedback={state.feedback}
+        showAnswer={state.showAnswer}
+        correctAnswerLabel={answerLabelFor(card)}
+        contextLine={contextLineFor(card)}
+        onNext={onNext}
+        onReveal={onReveal}
+        onTryAgain={onTryAgain}
+      />
+    </QuizFrame>
   )
 }

@@ -1,6 +1,8 @@
 import { useState, useCallback, useMemo, useRef } from 'react'
 import { Character, CharacterCategory, PhraseCategory } from '../../domain/entities/Character'
-import { PracticeMode } from '../../domain/entities/PracticeMode'
+import { PracticeMode, resolveModeForCategory } from '../../domain/entities/PracticeMode'
+import { SESSION_SIZE, SessionAnswer } from '../../domain/entities/Session'
+import { KanaRow } from '../../domain/entities/KanaRow'
 import { ICharacterRepository } from '../../domain/repositories/ICharacterRepository'
 import { IProgressRepository } from '../../domain/repositories/IProgressRepository'
 import { CheckAnswer } from '../../domain/usecases/CheckAnswer'
@@ -10,6 +12,7 @@ import { GenerateDistractors } from '../../domain/usecases/GenerateDistractors'
 import { CharacterRepositoryImpl } from '../../data/repositories/CharacterRepositoryImpl'
 import { LocalStorageProgressRepository } from '../../data/repositories/LocalStorageProgressRepository'
 import { shuffleArray } from '../../domain/services/shuffleArray'
+import { summarizeSession } from '../../domain/services/summarizeSession'
 
 const repository: ICharacterRepository = new CharacterRepositoryImpl()
 const progressRepository: IProgressRepository = new LocalStorageProgressRepository()
@@ -25,9 +28,19 @@ function buildChoices(character: Character): Character[] {
   return shuffleArray([character, ...distractors])
 }
 
+function buildSessionDeck(
+  category: CharacterCategory,
+  subCategory?: PhraseCategory,
+  kanaRows: KanaRow[] = []
+): Character[] {
+  return getPracticeDeck.execute({ category, subCategory, kanaRows, limit: SESSION_SIZE })
+}
+
 export interface QuizState {
   category: CharacterCategory
   phraseCategory?: PhraseCategory
+  // Kana rows to practice; empty means every row. Shared by hiragana and katakana.
+  kanaRows: KanaRow[]
   mode: PracticeMode
   characters: Character[]
   currentIndex: number
@@ -35,22 +48,34 @@ export interface QuizState {
   choices?: Character[]
   feedback: 'idle' | 'correct' | 'incorrect'
   showAnswer: boolean
+  sessionAnswers: SessionAnswer[]
+  finished: boolean
+  isReview: boolean
+}
+
+// The per-deck slice of QuizState, reset whenever a new deck starts.
+function startDeck(characters: Character[], mode: PracticeMode, isReview = false) {
+  const first = characters[0]
+  return {
+    characters,
+    currentIndex: 0,
+    answer: '',
+    choices: mode === PracticeMode.MULTIPLE_CHOICE && first ? buildChoices(first) : undefined,
+    feedback: 'idle' as const,
+    showAnswer: false,
+    sessionAnswers: [],
+    finished: false,
+    isReview,
+  }
 }
 
 export function useCharacterQuiz() {
-  const [state, setState] = useState<QuizState>(() => {
-    const characters = getPracticeDeck.execute({ category: CharacterCategory.HIRAGANA })
-    return {
-      category: CharacterCategory.HIRAGANA,
-      mode: PracticeMode.ROMAJI_INPUT,
-      characters,
-      currentIndex: 0,
-      answer: '',
-      choices: undefined,
-      feedback: 'idle',
-      showAnswer: false,
-    }
-  })
+  const [state, setState] = useState<QuizState>(() => ({
+    category: CharacterCategory.HIRAGANA,
+    kanaRows: [],
+    mode: PracticeMode.ROMAJI_INPUT,
+    ...startDeck(buildSessionDeck(CharacterCategory.HIRAGANA), PracticeMode.ROMAJI_INPUT),
+  }))
 
   // Tracks the currentIndex already recorded via RecordAnswer, so re-submitting
   // the same card (e.g. after "Intentar de nuevo") never double-counts a result.
@@ -64,38 +89,33 @@ export function useCharacterQuiz() {
   const setCategory = useCallback((category: CharacterCategory) => {
     recordedIndexRef.current = -1
     setState((prev) => {
-      const characters = getPracticeDeck.execute({ category })
-      const first = characters[0]
+      const mode = resolveModeForCategory(prev.mode, category)
       return {
         ...prev,
         category,
+        mode,
         phraseCategory: undefined,
-        characters,
-        currentIndex: 0,
-        answer: '',
-        choices: prev.mode === PracticeMode.MULTIPLE_CHOICE && first ? buildChoices(first) : undefined,
-        feedback: 'idle',
-        showAnswer: false,
+        ...startDeck(buildSessionDeck(category, undefined, prev.kanaRows), mode),
       }
     })
   }, [])
 
+  const setKanaRows = useCallback((kanaRows: KanaRow[]) => {
+    recordedIndexRef.current = -1
+    setState((prev) => ({
+      ...prev,
+      kanaRows,
+      ...startDeck(buildSessionDeck(prev.category, prev.phraseCategory, kanaRows), prev.mode),
+    }))
+  }, [])
+
   const setPhraseCategory = useCallback((subCategory: PhraseCategory) => {
     recordedIndexRef.current = -1
-    setState((prev) => {
-      const characters = getPracticeDeck.execute({ category: CharacterCategory.PHRASE, subCategory })
-      const first = characters[0]
-      return {
-        ...prev,
-        phraseCategory: subCategory,
-        characters,
-        currentIndex: 0,
-        answer: '',
-        choices: prev.mode === PracticeMode.MULTIPLE_CHOICE && first ? buildChoices(first) : undefined,
-        feedback: 'idle',
-        showAnswer: false,
-      }
-    })
+    setState((prev) => ({
+      ...prev,
+      phraseCategory: subCategory,
+      ...startDeck(buildSessionDeck(CharacterCategory.PHRASE, subCategory), prev.mode),
+    }))
   }, [])
 
   const setMode = useCallback((mode: PracticeMode) => {
@@ -116,22 +136,32 @@ export function useCharacterQuiz() {
     setState((prev) => ({ ...prev, answer }))
   }, [])
 
+  // Persists the first attempt on the current card; later retries return false.
+  const recordFirstAttempt = useCallback(
+    (character: Character, isCorrect: boolean): boolean => {
+      if (recordedIndexRef.current === state.currentIndex) return false
+      recordAnswerUseCase.execute(character.id, isCorrect)
+      recordedIndexRef.current = state.currentIndex
+      return true
+    },
+    [state.currentIndex]
+  )
+
   const submitAnswer = useCallback(() => {
     const character = state.characters[state.currentIndex]
     if (!character) return
 
     const isCorrect = checkAnswerUseCase.execute(character, state.answer)
-
-    if (recordedIndexRef.current !== state.currentIndex) {
-      recordAnswerUseCase.execute(character.id, isCorrect)
-      recordedIndexRef.current = state.currentIndex
-    }
+    const isFirstAttempt = recordFirstAttempt(character, isCorrect)
 
     setState((prev) => ({
       ...prev,
       feedback: isCorrect ? 'correct' : 'incorrect',
+      sessionAnswers: isFirstAttempt
+        ? [...prev.sessionAnswers, { itemId: character.id, isCorrect }]
+        : prev.sessionAnswers,
     }))
-  }, [state.characters, state.currentIndex, state.answer])
+  }, [state.characters, state.currentIndex, state.answer, recordFirstAttempt])
 
   const selectChoice = useCallback(
     (characterId: string) => {
@@ -139,25 +169,27 @@ export function useCharacterQuiz() {
       if (!character) return
 
       const isCorrect = characterId === character.id
-
-      if (recordedIndexRef.current !== state.currentIndex) {
-        recordAnswerUseCase.execute(character.id, isCorrect)
-        recordedIndexRef.current = state.currentIndex
-      }
+      const isFirstAttempt = recordFirstAttempt(character, isCorrect)
 
       setState((prev) => ({
         ...prev,
         answer: characterId,
         feedback: isCorrect ? 'correct' : 'incorrect',
         showAnswer: true,
+        sessionAnswers: isFirstAttempt
+          ? [...prev.sessionAnswers, { itemId: character.id, isCorrect }]
+          : prev.sessionAnswers,
       }))
     },
-    [state.characters, state.currentIndex]
+    [state.characters, state.currentIndex, recordFirstAttempt]
   )
 
   const nextCharacter = useCallback(() => {
     setState((prev) => {
-      const nextIndex = (prev.currentIndex + 1) % prev.characters.length
+      const nextIndex = prev.currentIndex + 1
+      if (nextIndex >= prev.characters.length) {
+        return { ...prev, finished: true }
+      }
       const next = prev.characters[nextIndex]
       return {
         ...prev,
@@ -178,11 +210,30 @@ export function useCharacterQuiz() {
     setState((prev) => ({ ...prev, feedback: 'idle', showAnswer: false }))
   }, [])
 
+  const restartSession = useCallback(() => {
+    recordedIndexRef.current = -1
+    setState((prev) => ({
+      ...prev,
+      ...startDeck(buildSessionDeck(prev.category, prev.phraseCategory, prev.kanaRows), prev.mode),
+    }))
+  }, [])
+
+  const reviewMistakes = useCallback(() => {
+    recordedIndexRef.current = -1
+    setState((prev) => {
+      const failedIds = new Set(summarizeSession(prev.sessionAnswers).failedIds)
+      const mistakes = shuffleArray(prev.characters.filter((c) => failedIds.has(c.id)))
+      if (mistakes.length === 0) return prev
+      return { ...prev, ...startDeck(mistakes, prev.mode, true) }
+    })
+  }, [])
+
   return {
     state,
     currentCharacter,
     setCategory,
     setPhraseCategory,
+    setKanaRows,
     setMode,
     setAnswer,
     submitAnswer,
@@ -190,5 +241,7 @@ export function useCharacterQuiz() {
     nextCharacter,
     revealAnswer,
     tryAgain,
+    restartSession,
+    reviewMistakes,
   }
 }

@@ -1,5 +1,5 @@
 import { CharacterRepositoryImpl } from '../../../data/repositories/CharacterRepositoryImpl'
-import { CharacterCategory, PhraseCategory } from '../../../domain/entities/Character'
+import { CharacterCategory, KanjiGroup, PhraseCategory } from '../../../domain/entities/Character'
 
 describe('CharacterRepositoryImpl', () => {
   const repository = new CharacterRepositoryImpl()
@@ -20,6 +20,22 @@ describe('CharacterRepositoryImpl', () => {
     const chars = repository.getByCategory(CharacterCategory.KANJI)
     expect(chars.length).toBeGreaterThan(0)
     chars.forEach((c) => expect(c.category).toBe(CharacterCategory.KANJI))
+  })
+
+  it('every kanji has a meaning, readings and a group', () => {
+    const kanji = repository.getByCategory(CharacterCategory.KANJI)
+    kanji.forEach((k) => {
+      expect(k.meaning?.trim()).toBeTruthy()
+      expect(k.readings?.onyomi.trim()).toBeTruthy()
+      expect(Object.values(KanjiGroup)).toContain(k.kanjiGroup)
+    })
+  })
+
+  it('every kanji group has at least one kanji', () => {
+    const kanji = repository.getByCategory(CharacterCategory.KANJI)
+    Object.values(KanjiGroup).forEach((group) => {
+      expect(kanji.some((k) => k.kanjiGroup === group)).toBe(true)
+    })
   })
 
   it('returns words', () => {

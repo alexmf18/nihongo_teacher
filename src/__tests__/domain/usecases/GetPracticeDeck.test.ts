@@ -3,6 +3,7 @@ import { CharacterRepositoryImpl } from '../../../data/repositories/CharacterRep
 import { IProgressRepository } from '../../../domain/repositories/IProgressRepository'
 import { CharacterProgress, ProgressMap } from '../../../domain/entities/Progress'
 import { CharacterCategory, PhraseCategory } from '../../../domain/entities/Character'
+import { KanaRow } from '../../../domain/entities/KanaRow'
 
 class InMemoryProgressRepository implements IProgressRepository {
   private map: ProgressMap = {}
@@ -36,6 +37,30 @@ describe('GetPracticeDeck', () => {
 
     expect(deck.length).toBe(pool.length)
     expect(new Set(deck.map((c) => c.id))).toEqual(new Set(pool.map((c) => c.id)))
+  })
+
+  it('restricts kana to the selected rows', () => {
+    const useCase = new GetPracticeDeck(characterRepo, new InMemoryProgressRepository())
+
+    const deck = useCase.execute({ category: CharacterCategory.KATAKANA, kanaRows: [KanaRow.A, KanaRow.PA] })
+
+    expect(deck.map((c) => c.character).sort()).toEqual(['ア', 'イ', 'ウ', 'エ', 'オ', 'パ', 'ピ', 'プ', 'ペ', 'ポ'].sort())
+  })
+
+  it('treats an empty row selection as every row', () => {
+    const useCase = new GetPracticeDeck(characterRepo, new InMemoryProgressRepository())
+
+    const deck = useCase.execute({ category: CharacterCategory.HIRAGANA, kanaRows: [] })
+
+    expect(deck.length).toBe(characterRepo.getByCategory(CharacterCategory.HIRAGANA).length)
+  })
+
+  it('ignores kana rows for non-kana categories', () => {
+    const useCase = new GetPracticeDeck(characterRepo, new InMemoryProgressRepository())
+
+    const deck = useCase.execute({ category: CharacterCategory.NUMBER, kanaRows: [KanaRow.A] })
+
+    expect(deck.length).toBe(characterRepo.getByCategory(CharacterCategory.NUMBER).length)
   })
 
   it('respects phrase subCategory filtering', () => {

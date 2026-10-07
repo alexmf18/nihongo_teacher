@@ -39,6 +39,34 @@ describe('GenerateDistractors', () => {
     expect(distractors.length).toBeLessThanOrEqual(pool.length - 1)
   })
 
+  it('prefers lookalike kana as distractors', () => {
+    const katakana = repository.getByCategory(CharacterCategory.KATAKANA)
+    const target = katakana.find((k) => k.character === 'シ')!
+
+    for (let run = 0; run < 10; run++) {
+      // シ has four lookalikes (ツ, ン, ソ and ジ), so all three picks come from them.
+      const distractors = useCase.execute(target, 3).map((d) => d.character)
+      distractors.forEach((k) => expect(['ツ', 'ン', 'ソ', 'ジ']).toContain(k))
+    }
+  })
+
+  it('fills with dakuten variants of the same kana', () => {
+    const hiragana = repository.getByCategory(CharacterCategory.HIRAGANA)
+    const target = hiragana.find((k) => k.character === 'ひ')!
+
+    const distractors = useCase.execute(target, 2).map((d) => d.character)
+    expect(distractors.sort()).toEqual(['び', 'ぴ'])
+  })
+
+  it('tops up with random kana when there are not enough lookalikes', () => {
+    const hiragana = repository.getByCategory(CharacterCategory.HIRAGANA)
+    const target = hiragana.find((k) => k.character === 'ひ')!
+
+    const distractors = useCase.execute(target, 3).map((d) => d.character)
+    expect(distractors).toHaveLength(3)
+    expect(distractors).toEqual(expect.arrayContaining(['び', 'ぴ']))
+  })
+
   it('respects the character field when deduping/labeling', () => {
     const target = repository.getByCategory(CharacterCategory.HIRAGANA)[0]
     const distractors = useCase.execute(target, 3, 'character')

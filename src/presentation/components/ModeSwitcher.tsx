@@ -2,15 +2,14 @@ import { PracticeMode, PRACTICE_MODE_LABELS } from '../../domain/entities/Practi
 
 interface ModeSwitcherProps {
   mode: PracticeMode
+  modes: PracticeMode[]
   onSelect: (mode: PracticeMode) => void
 }
 
-const MODES = Object.values(PracticeMode)
-
-export function ModeSwitcher({ mode, onSelect }: ModeSwitcherProps) {
+export function ModeSwitcher({ mode, modes, onSelect }: ModeSwitcherProps) {
   return (
     <div className="flex flex-wrap gap-1.5">
-      {MODES.map((candidate) => {
+      {modes.map((candidate) => {
         const isActive = candidate === mode
         return (
           <button

@@ -28,6 +28,18 @@ describe('CheckParticleAnswer', () => {
     expect(useCase.execute(item, '')).toBe(false)
   })
 
+  it('accepts the particle typed in romaji as pronounced', () => {
+    expect(useCase.execute(item, 'wa')).toBe(true)
+    expect(useCase.execute(item, ' WA ')).toBe(true)
+    expect(useCase.execute(item, 'ha')).toBe(false)
+  })
+
+  it('accepts both o and wo for を', () => {
+    const wo: ParticleItem = { ...item, particle: 'を' }
+    expect(useCase.execute(wo, 'o')).toBe(true)
+    expect(useCase.execute(wo, 'wo')).toBe(true)
+  })
+
   it('accepts any listed acceptable alternative', () => {
     const withAlternatives: ParticleItem = { ...item, acceptableParticles: ['も'] }
     expect(useCase.execute(withAlternatives, 'も')).toBe(true)

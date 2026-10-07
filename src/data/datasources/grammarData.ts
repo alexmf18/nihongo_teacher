@@ -1,4 +1,70 @@
-import { GrammarCategory, GrammarItem } from '../../domain/entities/GrammarItem'
+import {
+  AdjectiveItem,
+  AdjectiveType,
+  ConjugationItem,
+  GrammarCategory,
+  GrammarItem,
+  VerbGroup,
+} from '../../domain/entities/GrammarItem'
+
+type FormRow = [formName: string, value: string, romaji: string]
+
+function verb(id: string, dictionaryForm: string, meaning: string, verbGroup: VerbGroup, rows: FormRow[]): ConjugationItem {
+  return {
+    id,
+    kind: GrammarCategory.CONJUGATION,
+    dictionaryForm,
+    meaning,
+    verbGroup,
+    forms: rows.map(([formName, value, romaji]) => ({ formName, value, romaji })),
+  }
+}
+
+// Regular い-adjective from its stem (高 + い): 高いです, 高くない, 高かった…
+function iAdjective(id: string, stem: string, stemRomaji: string, meaning: string): AdjectiveItem {
+  return {
+    id,
+    kind: GrammarCategory.ADJECTIVE,
+    dictionaryForm: `${stem}い`,
+    meaning,
+    adjectiveType: AdjectiveType.I,
+    forms: [
+      { formName: 'polite', value: `${stem}いです`, romaji: `${stemRomaji}i desu` },
+      { formName: 'plain_negative', value: `${stem}くない`, romaji: `${stemRomaji}kunai` },
+      { formName: 'plain_past', value: `${stem}かった`, romaji: `${stemRomaji}katta` },
+      { formName: 'plain_past_negative', value: `${stem}くなかった`, romaji: `${stemRomaji}kunakatta` },
+      { formName: 'te', value: `${stem}くて`, romaji: `${stemRomaji}kute` },
+    ],
+  }
+}
+
+// な-adjective: 静かです, 静かじゃない (or ではない), 静かだった…
+function naAdjective(id: string, word: string, romaji: string, meaning: string): AdjectiveItem {
+  return {
+    id,
+    kind: GrammarCategory.ADJECTIVE,
+    dictionaryForm: word,
+    meaning,
+    adjectiveType: AdjectiveType.NA,
+    forms: [
+      { formName: 'polite', value: `${word}です`, romaji: `${romaji} desu` },
+      {
+        formName: 'plain_negative',
+        value: `${word}じゃない`,
+        romaji: `${romaji} janai`,
+        alternatives: [`${word}ではない`, `${romaji} dewa nai`],
+      },
+      { formName: 'plain_past', value: `${word}だった`, romaji: `${romaji} datta` },
+      {
+        formName: 'plain_past_negative',
+        value: `${word}じゃなかった`,
+        romaji: `${romaji} janakatta`,
+        alternatives: [`${word}ではなかった`, `${romaji} dewa nakatta`],
+      },
+      { formName: 'te', value: `${word}で`, romaji: `${romaji} de` },
+    ],
+  }
+}
 
 export const grammarData: GrammarItem[] = [
   // ========================
@@ -120,84 +186,145 @@ export const grammarData: GrammarItem[] = [
   // ========================
   // CONJUGATION (N5 verbs)
   // ========================
+  verb('conj-taberu', '食べる', 'comer', VerbGroup.ICHIDAN, [
+    ['masu', '食べます', 'tabemasu'],
+    ['negative', '食べません', 'tabemasen'],
+    ['past', '食べました', 'tabemashita'],
+    ['polite_past_negative', '食べませんでした', 'tabemasendeshita'],
+    ['plain_negative', '食べない', 'tabenai'],
+    ['plain_past', '食べた', 'tabeta'],
+    ['plain_past_negative', '食べなかった', 'tabenakatta'],
+    ['te', '食べて', 'tabete'],
+    ['tai', '食べたい', 'tabetai'],
+  ]),
+  verb('conj-miru', '見る', 'ver', VerbGroup.ICHIDAN, [
+    ['masu', '見ます', 'mimasu'],
+    ['negative', '見ません', 'mimasen'],
+    ['past', '見ました', 'mimashita'],
+    ['polite_past_negative', '見ませんでした', 'mimasendeshita'],
+    ['plain_negative', '見ない', 'minai'],
+    ['plain_past', '見た', 'mita'],
+    ['plain_past_negative', '見なかった', 'minakatta'],
+    ['te', '見て', 'mite'],
+    ['tai', '見たい', 'mitai'],
+  ]),
+  verb('conj-nomu', '飲む', 'beber', VerbGroup.GODAN, [
+    ['masu', '飲みます', 'nomimasu'],
+    ['negative', '飲みません', 'nomimasen'],
+    ['past', '飲みました', 'nomimashita'],
+    ['polite_past_negative', '飲みませんでした', 'nomimasendeshita'],
+    ['plain_negative', '飲まない', 'nomanai'],
+    ['plain_past', '飲んだ', 'nonda'],
+    ['plain_past_negative', '飲まなかった', 'nomanakatta'],
+    ['te', '飲んで', 'nonde'],
+    ['tai', '飲みたい', 'nomitai'],
+  ]),
+  verb('conj-iku', '行く', 'ir', VerbGroup.GODAN, [
+    ['masu', '行きます', 'ikimasu'],
+    ['negative', '行きません', 'ikimasen'],
+    ['past', '行きました', 'ikimashita'],
+    ['polite_past_negative', '行きませんでした', 'ikimasendeshita'],
+    ['plain_negative', '行かない', 'ikanai'],
+    ['plain_past', '行った', 'itta'],
+    ['plain_past_negative', '行かなかった', 'ikanakatta'],
+    ['te', '行って', 'itte'],
+    ['tai', '行きたい', 'ikitai'],
+  ]),
+  verb('conj-hanasu', '話す', 'hablar', VerbGroup.GODAN, [
+    ['masu', '話します', 'hanashimasu'],
+    ['negative', '話しません', 'hanashimasen'],
+    ['past', '話しました', 'hanashimashita'],
+    ['polite_past_negative', '話しませんでした', 'hanashimasendeshita'],
+    ['plain_negative', '話さない', 'hanasanai'],
+    ['plain_past', '話した', 'hanashita'],
+    ['plain_past_negative', '話さなかった', 'hanasanakatta'],
+    ['te', '話して', 'hanashite'],
+    ['tai', '話したい', 'hanashitai'],
+  ]),
+  verb('conj-kaku', '書く', 'escribir', VerbGroup.GODAN, [
+    ['masu', '書きます', 'kakimasu'],
+    ['negative', '書きません', 'kakimasen'],
+    ['past', '書きました', 'kakimashita'],
+    ['polite_past_negative', '書きませんでした', 'kakimasendeshita'],
+    ['plain_negative', '書かない', 'kakanai'],
+    ['plain_past', '書いた', 'kaita'],
+    ['plain_past_negative', '書かなかった', 'kakanakatta'],
+    ['te', '書いて', 'kaite'],
+    ['tai', '書きたい', 'kakitai'],
+  ]),
+  verb('conj-kau', '買う', 'comprar', VerbGroup.GODAN, [
+    ['masu', '買います', 'kaimasu'],
+    ['negative', '買いません', 'kaimasen'],
+    ['past', '買いました', 'kaimashita'],
+    ['polite_past_negative', '買いませんでした', 'kaimasendeshita'],
+    ['plain_negative', '買わない', 'kawanai'],
+    ['plain_past', '買った', 'katta'],
+    ['plain_past_negative', '買わなかった', 'kawanakatta'],
+    ['te', '買って', 'katte'],
+    ['tai', '買いたい', 'kaitai'],
+  ]),
+  verb('conj-matsu', '待つ', 'esperar', VerbGroup.GODAN, [
+    ['masu', '待ちます', 'machimasu'],
+    ['negative', '待ちません', 'machimasen'],
+    ['past', '待ちました', 'machimashita'],
+    ['polite_past_negative', '待ちませんでした', 'machimasendeshita'],
+    ['plain_negative', '待たない', 'matanai'],
+    ['plain_past', '待った', 'matta'],
+    ['plain_past_negative', '待たなかった', 'matanakatta'],
+    ['te', '待って', 'matte'],
+    ['tai', '待ちたい', 'machitai'],
+  ]),
+  verb('conj-suru', 'する', 'hacer', VerbGroup.IRREGULAR, [
+    ['masu', 'します', 'shimasu'],
+    ['negative', 'しません', 'shimasen'],
+    ['past', 'しました', 'shimashita'],
+    ['polite_past_negative', 'しませんでした', 'shimasendeshita'],
+    ['plain_negative', 'しない', 'shinai'],
+    ['plain_past', 'した', 'shita'],
+    ['plain_past_negative', 'しなかった', 'shinakatta'],
+    ['te', 'して', 'shite'],
+    ['tai', 'したい', 'shitai'],
+  ]),
+  verb('conj-kuru', '来る', 'venir', VerbGroup.IRREGULAR, [
+    ['masu', '来ます', 'kimasu'],
+    ['negative', '来ません', 'kimasen'],
+    ['past', '来ました', 'kimashita'],
+    ['polite_past_negative', '来ませんでした', 'kimasendeshita'],
+    ['plain_negative', '来ない', 'konai'],
+    ['plain_past', '来た', 'kita'],
+    ['plain_past_negative', '来なかった', 'konakatta'],
+    ['te', '来て', 'kite'],
+    ['tai', '来たい', 'kitai'],
+  ]),
+
+  // ========================
+  // ADJECTIVES (N5)
+  // ========================
+  iAdjective('adj-takai', '高', 'taka', 'caro / alto'),
+  iAdjective('adj-ookii', '大き', 'ooki', 'grande'),
+  iAdjective('adj-atarashii', '新し', 'atarashi', 'nuevo'),
+  iAdjective('adj-tanoshii', '楽し', 'tanoshi', 'divertido'),
   {
-    id: 'conj-taberu',
-    kind: GrammarCategory.CONJUGATION,
-    dictionaryForm: '食べる',
-    meaning: 'comer',
+    // いい conjugates from its older form よい.
+    id: 'adj-ii',
+    kind: GrammarCategory.ADJECTIVE,
+    dictionaryForm: 'いい',
+    meaning: 'bueno',
+    adjectiveType: AdjectiveType.I,
     forms: [
-      { formName: 'dictionary', value: '食べる', romaji: 'taberu' },
-      { formName: 'masu', value: '食べます', romaji: 'tabemasu' },
-      { formName: 'past', value: '食べました', romaji: 'tabemashita' },
-      { formName: 'negative', value: '食べません', romaji: 'tabemasen' },
-      { formName: 'te', value: '食べて', romaji: 'tabete' },
+      { formName: 'polite', value: 'いいです', romaji: 'ii desu' },
+      { formName: 'plain_negative', value: 'よくない', romaji: 'yokunai' },
+      { formName: 'plain_past', value: 'よかった', romaji: 'yokatta' },
+      { formName: 'plain_past_negative', value: 'よくなかった', romaji: 'yokunakatta' },
+      { formName: 'te', value: 'よくて', romaji: 'yokute' },
     ],
   },
-  {
-    id: 'conj-nomu',
-    kind: GrammarCategory.CONJUGATION,
-    dictionaryForm: '飲む',
-    meaning: 'beber',
-    forms: [
-      { formName: 'dictionary', value: '飲む', romaji: 'nomu' },
-      { formName: 'masu', value: '飲みます', romaji: 'nomimasu' },
-      { formName: 'past', value: '飲みました', romaji: 'nomimashita' },
-      { formName: 'negative', value: '飲みません', romaji: 'nomimasen' },
-      { formName: 'te', value: '飲んで', romaji: 'nonde' },
-    ],
-  },
-  {
-    id: 'conj-iku',
-    kind: GrammarCategory.CONJUGATION,
-    dictionaryForm: '行く',
-    meaning: 'ir',
-    forms: [
-      { formName: 'dictionary', value: '行く', romaji: 'iku' },
-      { formName: 'masu', value: '行きます', romaji: 'ikimasu' },
-      { formName: 'past', value: '行きました', romaji: 'ikimashita' },
-      { formName: 'negative', value: '行きません', romaji: 'ikimasen' },
-      { formName: 'te', value: '行って', romaji: 'itte' },
-    ],
-  },
-  {
-    id: 'conj-hanasu',
-    kind: GrammarCategory.CONJUGATION,
-    dictionaryForm: '話す',
-    meaning: 'hablar',
-    forms: [
-      { formName: 'dictionary', value: '話す', romaji: 'hanasu' },
-      { formName: 'masu', value: '話します', romaji: 'hanashimasu' },
-      { formName: 'past', value: '話しました', romaji: 'hanashimashita' },
-      { formName: 'negative', value: '話しません', romaji: 'hanashimasen' },
-      { formName: 'te', value: '話して', romaji: 'hanashite' },
-    ],
-  },
-  {
-    id: 'conj-kaku',
-    kind: GrammarCategory.CONJUGATION,
-    dictionaryForm: '書く',
-    meaning: 'escribir',
-    forms: [
-      { formName: 'dictionary', value: '書く', romaji: 'kaku' },
-      { formName: 'masu', value: '書きます', romaji: 'kakimasu' },
-      { formName: 'past', value: '書きました', romaji: 'kakimashita' },
-      { formName: 'negative', value: '書きません', romaji: 'kakimasen' },
-      { formName: 'te', value: '書いて', romaji: 'kaite' },
-    ],
-  },
-  {
-    id: 'conj-miru',
-    kind: GrammarCategory.CONJUGATION,
-    dictionaryForm: '見る',
-    meaning: 'ver',
-    forms: [
-      { formName: 'dictionary', value: '見る', romaji: 'miru' },
-      { formName: 'masu', value: '見ます', romaji: 'mimasu' },
-      { formName: 'past', value: '見ました', romaji: 'mimashita' },
-      { formName: 'negative', value: '見ません', romaji: 'mimasen' },
-      { formName: 'te', value: '見て', romaji: 'mite' },
-    ],
-  },
+  naAdjective('adj-shizuka', '静か', 'shizuka', 'tranquilo'),
+  naAdjective('adj-genki', '元気', 'genki', 'animado / sano'),
+  naAdjective('adj-suki', '好き', 'suki', 'que gusta'),
+  naAdjective('adj-yuumei', '有名', 'yuumei', 'famoso'),
+  // Ends in い but is a な-adjective: a classic trap.
+  naAdjective('adj-kirei', 'きれい', 'kirei', 'bonito / limpio'),
 
   // ========================
   // COUNTERS
@@ -206,11 +333,19 @@ export const grammarData: GrammarItem[] = [
     id: 'counter-tsu',
     kind: GrammarCategory.COUNTER,
     counter: 'つ',
-    usage: 'Objetos en general (del 1 al 9)',
+    usage: 'Objetos en general (del 1 al 10)',
+    suffixReadings: ['つ'],
     examples: [
       { number: 1, reading: 'ひとつ', romaji: 'hitotsu' },
       { number: 2, reading: 'ふたつ', romaji: 'futatsu' },
       { number: 3, reading: 'みっつ', romaji: 'mittsu' },
+      { number: 4, reading: 'よっつ', romaji: 'yottsu' },
+      { number: 5, reading: 'いつつ', romaji: 'itsutsu' },
+      { number: 6, reading: 'むっつ', romaji: 'muttsu' },
+      { number: 7, reading: 'ななつ', romaji: 'nanatsu' },
+      { number: 8, reading: 'やっつ', romaji: 'yattsu' },
+      { number: 9, reading: 'ここのつ', romaji: 'kokonotsu' },
+      { number: 10, reading: 'とお', romaji: 'too' },
     ],
   },
   {
@@ -218,10 +353,18 @@ export const grammarData: GrammarItem[] = [
     kind: GrammarCategory.COUNTER,
     counter: '人',
     usage: 'Personas',
+    suffixReadings: ['にん'],
     examples: [
       { number: 1, reading: 'ひとり', romaji: 'hitori' },
       { number: 2, reading: 'ふたり', romaji: 'futari' },
       { number: 3, reading: 'さんにん', romaji: 'sannin' },
+      { number: 4, reading: 'よにん', romaji: 'yonin' },
+      { number: 5, reading: 'ごにん', romaji: 'gonin' },
+      { number: 6, reading: 'ろくにん', romaji: 'rokunin' },
+      { number: 7, reading: 'しちにん', romaji: 'shichinin', alternatives: ['ななにん', 'nananin'] },
+      { number: 8, reading: 'はちにん', romaji: 'hachinin' },
+      { number: 9, reading: 'きゅうにん', romaji: 'kyuunin', alternatives: ['kyunin'] },
+      { number: 10, reading: 'じゅうにん', romaji: 'juunin', alternatives: ['junin'] },
     ],
   },
   {
@@ -229,10 +372,18 @@ export const grammarData: GrammarItem[] = [
     kind: GrammarCategory.COUNTER,
     counter: '匹',
     usage: 'Animales pequeños (gatos, perros, peces)',
+    suffixReadings: ['ひき', 'びき', 'ぴき'],
     examples: [
       { number: 1, reading: 'いっぴき', romaji: 'ippiki' },
       { number: 2, reading: 'にひき', romaji: 'nihiki' },
-      { number: 3, reading: 'さんびき', romaji: 'sanbiki' },
+      { number: 3, reading: 'さんびき', romaji: 'sanbiki', alternatives: ['sambiki'] },
+      { number: 4, reading: 'よんひき', romaji: 'yonhiki' },
+      { number: 5, reading: 'ごひき', romaji: 'gohiki' },
+      { number: 6, reading: 'ろっぴき', romaji: 'roppiki' },
+      { number: 7, reading: 'ななひき', romaji: 'nanahiki' },
+      { number: 8, reading: 'はっぴき', romaji: 'happiki', alternatives: ['はちひき', 'hachihiki'] },
+      { number: 9, reading: 'きゅうひき', romaji: 'kyuuhiki', alternatives: ['kyuhiki'] },
+      { number: 10, reading: 'じゅっぴき', romaji: 'juppiki', alternatives: ['じっぴき', 'jippiki'] },
     ],
   },
   {
@@ -240,10 +391,18 @@ export const grammarData: GrammarItem[] = [
     kind: GrammarCategory.COUNTER,
     counter: '本',
     usage: 'Objetos alargados (botellas, lápices)',
+    suffixReadings: ['ほん', 'ぼん', 'ぽん'],
     examples: [
       { number: 1, reading: 'いっぽん', romaji: 'ippon' },
       { number: 2, reading: 'にほん', romaji: 'nihon' },
-      { number: 3, reading: 'さんぼん', romaji: 'sanbon' },
+      { number: 3, reading: 'さんぼん', romaji: 'sanbon', alternatives: ['sambon'] },
+      { number: 4, reading: 'よんほん', romaji: 'yonhon' },
+      { number: 5, reading: 'ごほん', romaji: 'gohon' },
+      { number: 6, reading: 'ろっぽん', romaji: 'roppon' },
+      { number: 7, reading: 'ななほん', romaji: 'nanahon' },
+      { number: 8, reading: 'はっぽん', romaji: 'happon', alternatives: ['はちほん', 'hachihon'] },
+      { number: 9, reading: 'きゅうほん', romaji: 'kyuuhon', alternatives: ['kyuhon'] },
+      { number: 10, reading: 'じゅっぽん', romaji: 'juppon', alternatives: ['じっぽん', 'jippon'] },
     ],
   },
   {
@@ -251,10 +410,18 @@ export const grammarData: GrammarItem[] = [
     kind: GrammarCategory.COUNTER,
     counter: '枚',
     usage: 'Objetos planos (papel, entradas)',
+    suffixReadings: ['まい'],
     examples: [
       { number: 1, reading: 'いちまい', romaji: 'ichimai' },
       { number: 2, reading: 'にまい', romaji: 'nimai' },
       { number: 3, reading: 'さんまい', romaji: 'sanmai' },
+      { number: 4, reading: 'よんまい', romaji: 'yonmai' },
+      { number: 5, reading: 'ごまい', romaji: 'gomai' },
+      { number: 6, reading: 'ろくまい', romaji: 'rokumai' },
+      { number: 7, reading: 'ななまい', romaji: 'nanamai' },
+      { number: 8, reading: 'はちまい', romaji: 'hachimai' },
+      { number: 9, reading: 'きゅうまい', romaji: 'kyuumai', alternatives: ['kyumai'] },
+      { number: 10, reading: 'じゅうまい', romaji: 'juumai', alternatives: ['jumai'] },
     ],
   },
 ]

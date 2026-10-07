@@ -41,7 +41,11 @@ const grammarCategories = [
   { key: GrammarScreen.PARTICLE_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.PARTICLE_QUIZ], icon: 'phrase' },
   { key: GrammarScreen.CONJUGATION_TABLE, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.CONJUGATION_TABLE], icon: 'kanji' },
   { key: GrammarScreen.CONJUGATION_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.CONJUGATION_QUIZ], icon: 'kanji' },
+  { key: GrammarScreen.ADJECTIVE_TABLE, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.ADJECTIVE_TABLE], icon: 'words' },
+  { key: GrammarScreen.ADJECTIVE_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.ADJECTIVE_QUIZ], icon: 'words' },
   { key: GrammarScreen.COUNTER_TABLE, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.COUNTER_TABLE], icon: 'number' },
+  { key: GrammarScreen.COUNTER_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.COUNTER_QUIZ], icon: 'number' },
+  { key: GrammarScreen.SENTENCE_QUIZ, label: GRAMMAR_SCREEN_LABELS[GrammarScreen.SENTENCE_QUIZ], icon: 'phrase' },
 ] satisfies { key: GrammarScreen; label: string; icon: SidebarIcon }[]
 
 const statsCategories = [

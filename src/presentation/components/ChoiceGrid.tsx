@@ -1,20 +1,22 @@
-import { Character } from '../../domain/entities/Character'
+export interface ChoiceOption {
+  id: string
+  label: string
+}
 
 interface ChoiceGridProps {
-  choices: Character[]
-  labelFor: (choice: Character) => string
+  options: ChoiceOption[]
   selectedId?: string
   correctId: string
   disabled: boolean
-  onSelect: (characterId: string) => void
+  onSelect: (id: string) => void
 }
 
-export function ChoiceGrid({ choices, labelFor, selectedId, correctId, disabled, onSelect }: ChoiceGridProps) {
+export function ChoiceGrid({ options, selectedId, correctId, disabled, onSelect }: ChoiceGridProps) {
   return (
     <div className="mx-auto grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
-      {choices.map((choice) => {
-        const isSelected = selectedId === choice.id
-        const isCorrectChoice = choice.id === correctId
+      {options.map((option) => {
+        const isSelected = selectedId === option.id
+        const isCorrectChoice = option.id === correctId
 
         let stateClasses = 'border-slate-200 bg-white text-slate-800 hover:border-accent hover:bg-accent-light'
         if (disabled && isCorrectChoice) {
@@ -27,13 +29,13 @@ export function ChoiceGrid({ choices, labelFor, selectedId, correctId, disabled,
 
         return (
           <button
-            key={choice.id}
+            key={option.id}
             type="button"
             disabled={disabled}
-            onClick={() => onSelect(choice.id)}
+            onClick={() => onSelect(option.id)}
             className={`h-[56px] rounded-lg border-2 px-5 text-lg font-bold transition-colors disabled:cursor-not-allowed ${stateClasses}`}
           >
-            {labelFor(choice)}
+            {option.label}
           </button>
         )
       })}
