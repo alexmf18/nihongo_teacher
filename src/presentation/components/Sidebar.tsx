@@ -189,7 +189,9 @@ export function Sidebar({
   return (
     <aside
       id="app-navigation"
-      className={`fixed inset-y-0 left-0 z-40 flex h-[100dvh] w-[280px] shrink-0 flex-col overflow-y-auto border-r border-keisen bg-papel-deep transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:static lg:translate-x-0 ${
+      // As a fixed drawer it ignores the app's safe-area padding, so it adds its own;
+      // docked (lg) it sits inside that padding already.
+      className={`fixed inset-y-0 left-0 z-40 flex h-[100dvh] w-[280px] shrink-0 flex-col overflow-y-auto border-r border-keisen bg-papel-deep pb-[var(--safe-bottom)] pt-[var(--safe-top)] transition-transform lg:h-full lg:pb-0 lg:pt-0 duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:static lg:translate-x-0 ${
         open ? 'translate-x-0 shadow-sheet' : '-translate-x-full'
       }`}
     >

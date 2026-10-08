@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
+import { App as CapacitorApp } from '@capacitor/app'
 import { Sidebar } from './Sidebar'
 import { QuizScreen } from './QuizScreen'
 import { GrammarQuizScreen } from './GrammarQuizScreen'
@@ -70,6 +72,21 @@ export function App() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [navOpen, closeNav])
 
+  // Android back button: close the menu if it is open, otherwise leave the app.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return
+    const listener = CapacitorApp.addListener('backButton', () => {
+      if (navOpen) {
+        closeNav()
+      } else {
+        CapacitorApp.exitApp()
+      }
+    })
+    return () => {
+      listener.then((handle) => handle.remove())
+    }
+  }, [navOpen, closeNav])
+
   const handleSelectCharacter = (category: CharacterCategory) => {
     setOverlay(null)
     setCategory(category)
@@ -93,7 +110,9 @@ export function App() {
   }
 
   return (
-    <div className="flex h-[100dvh] bg-papel text-sumi">
+    // In the edge-to-edge Android app the content stays clear of the status and
+    // navigation bars; in a browser the safe areas are 0.
+    <div className="flex h-[100dvh] bg-papel pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] pt-[var(--safe-top)] text-sumi">
       <Sidebar
         selected={overlay ?? state.category}
         selectedPhrase={state.phraseCategory}
