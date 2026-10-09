@@ -12,7 +12,7 @@
     "android:sync": "vite build && cap sync android",
     "android:open": "cap open android",
     "android:run": "vite build && cap run android",
-    "android:apk": "vite build && cap sync android && cd android && gradlew.bat assembleDebug"
+    "android:apk": "vite build && cap sync android && cd android && .\\gradlew.bat assembleDebug"
   },
   "dependencies": {
     "@capacitor-community/text-to-speech": "^8.0.2",

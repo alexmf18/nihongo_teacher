@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Capacitor } from '@capacitor/core'
 import {
   CharacterCategory,
   PhraseCategory,
@@ -66,6 +67,12 @@ const grammarCategories: NavItem[] = Object.values(GrammarScreen).map((screen) =
 const statsCategories: NavItem[] = [{ key: STATS_SCREEN_KEY, label: 'Mi progreso', glyph: '進' }]
 
 const phraseSubCategories = Object.values(PhraseCategory)
+
+// The APK is attached to the latest GitHub release; this URL always points to it.
+const ANDROID_APK_URL = 'https://github.com/alexmf18/nihongo_teacher/releases/latest/download/nihongo-teacher.apk'
+
+// Inside the installed app the download link makes no sense.
+const isNative = Capacitor.isNativePlatform()
 
 function CategorySection({
   title,
@@ -248,6 +255,29 @@ export function Sidebar({
           onSelectPhrase={() => {}}
         />
       </nav>
+
+      {!isNative && (
+        <div className="border-t border-keisen px-3 py-4">
+          <a
+            href={ANDROID_APK_URL}
+            download
+            className="flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-[15px] text-sumi-soft transition-colors hover:bg-white/70 hover:text-sumi"
+          >
+            <span
+              aria-hidden="true"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] border border-keisen-strong bg-papel text-sumi"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <span>
+              Descargar app Android
+              <span className="block text-xs text-sumi-soft">APK para instalar en el móvil</span>
+            </span>
+          </a>
+        </div>
+      )}
     </aside>
   )
 }
