@@ -4,6 +4,7 @@ export enum GrammarCategory {
   ADJECTIVE = 'adjective',
   COUNTER = 'counter',
   SENTENCE = 'sentence',
+  KOSOADO = 'kosoado',
 }
 
 export interface ParticleItem {
@@ -102,4 +103,17 @@ export interface SentenceItem {
   alternativeOrders?: string[][]
 }
 
-export type GrammarItem = ParticleItem | ConjugationItem | AdjectiveItem | CounterItem | SentenceItem
+// A sentence with the こそあど word blanked out. The situation says where the
+// thing is, since the translation alone (esto / eso) can be ambiguous.
+export interface KosoadoItem {
+  id: string
+  kind: GrammarCategory.KOSOADO
+  word: string
+  sentenceParts: [string, string]
+  translation: string
+  situation: string
+  // Other words that also fit, e.g. どこ next to the politer どちら.
+  acceptableWords?: string[]
+}
+
+export type GrammarItem = ParticleItem | ConjugationItem | AdjectiveItem | CounterItem | SentenceItem | KosoadoItem

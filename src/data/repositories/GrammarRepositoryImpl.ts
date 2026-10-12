@@ -2,8 +2,9 @@ import { GrammarCategory, GrammarItem } from '../../domain/entities/GrammarItem'
 import { IGrammarRepository } from '../../domain/repositories/IGrammarRepository'
 import { grammarData } from '../datasources/grammarData'
 import { sentenceData } from '../datasources/sentenceData'
+import { kosoadoData } from '../datasources/kosoadoData'
 
-const allItems: GrammarItem[] = [...grammarData, ...sentenceData]
+const allItems: GrammarItem[] = [...grammarData, ...sentenceData, ...kosoadoData]
 
 export class GrammarRepositoryImpl implements IGrammarRepository {
   getByKind<K extends GrammarCategory>(kind: K): Extract<GrammarItem, { kind: K }>[] {

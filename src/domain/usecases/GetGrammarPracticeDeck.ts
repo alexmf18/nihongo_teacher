@@ -28,6 +28,14 @@ export class GetGrammarPracticeDeck {
       }))
     }
 
+    if (kind === GrammarCategory.KOSOADO) {
+      return this.grammarRepo.getByKind(GrammarCategory.KOSOADO).map((item) => ({
+        id: item.id,
+        kind: GrammarCategory.KOSOADO as const,
+        item,
+      }))
+    }
+
     if (kind === GrammarCategory.SENTENCE) {
       return this.grammarRepo.getByKind(GrammarCategory.SENTENCE).map((item) => ({
         id: item.id,

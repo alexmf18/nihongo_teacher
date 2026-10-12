@@ -9,6 +9,8 @@ export enum GrammarScreen {
   ADJECTIVE_QUIZ = 'adjective_quiz',
   COUNTER_TABLE = 'counter_table',
   COUNTER_QUIZ = 'counter_quiz',
+  KOSOADO_TABLE = 'kosoado_table',
+  KOSOADO_QUIZ = 'kosoado_quiz',
   SENTENCE_QUIZ = 'sentence_quiz',
 }
 
@@ -21,6 +23,8 @@ export const GRAMMAR_SCREEN_LABELS: Record<GrammarScreen, string> = {
   [GrammarScreen.ADJECTIVE_QUIZ]: 'Practicar Adjetivos',
   [GrammarScreen.COUNTER_TABLE]: 'Tabla de Contadores',
   [GrammarScreen.COUNTER_QUIZ]: 'Practicar Contadores',
+  [GrammarScreen.KOSOADO_TABLE]: 'Tabla de Ko-so-a-do',
+  [GrammarScreen.KOSOADO_QUIZ]: 'Practicar Ko-so-a-do',
   [GrammarScreen.SENTENCE_QUIZ]: 'Ordenar frases',
 }
 
@@ -30,5 +34,6 @@ export const GRAMMAR_QUIZ_KINDS: Partial<Record<GrammarScreen, GrammarCategory>>
   [GrammarScreen.CONJUGATION_QUIZ]: GrammarCategory.CONJUGATION,
   [GrammarScreen.ADJECTIVE_QUIZ]: GrammarCategory.ADJECTIVE,
   [GrammarScreen.COUNTER_QUIZ]: GrammarCategory.COUNTER,
+  [GrammarScreen.KOSOADO_QUIZ]: GrammarCategory.KOSOADO,
   [GrammarScreen.SENTENCE_QUIZ]: GrammarCategory.SENTENCE,
 }

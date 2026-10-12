@@ -15,6 +15,7 @@ import { PhraseTable } from './PhraseTable'
 import { ParticleTable } from './ParticleTable'
 import { ConjugationTable } from './ConjugationTable'
 import { CounterTable } from './CounterTable'
+import { KosoadoTable } from './KosoadoTable'
 import { useCharacterQuiz } from '../hooks/useCharacterQuiz'
 import { useGrammarQuiz } from '../hooks/useGrammarQuiz'
 import { useProgressStats } from '../hooks/useProgressStats'
@@ -152,6 +153,8 @@ export function App() {
             <ConjugationTable kind={GrammarCategory.ADJECTIVE} />
           ) : overlay === GrammarScreen.COUNTER_TABLE ? (
             <CounterTable />
+          ) : overlay === GrammarScreen.KOSOADO_TABLE ? (
+            <KosoadoTable />
           ) : isGrammarQuiz ? (
             <GrammarQuizScreen
               state={grammarState}

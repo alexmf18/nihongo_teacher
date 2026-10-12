@@ -5,6 +5,7 @@ import { getGrammarModes, PracticeMode } from '../../domain/entities/PracticeMod
 import { correctAnswerFor } from '../../domain/services/grammarAnswer'
 import { summarizeSession } from '../../domain/services/summarizeSession'
 import { ParticleSentenceCard } from './ParticleSentenceCard'
+import { KosoadoSentenceCard } from './KosoadoSentenceCard'
 import { ConjugationCard } from './ConjugationCard'
 import { formLabel } from '../../domain/entities/ConjugationFormLabels'
 import { CounterPromptCard } from './CounterPromptCard'
@@ -37,6 +38,7 @@ const PLACEHOLDERS: Record<GrammarCategory, string> = {
   [GrammarCategory.ADJECTIVE]: 'Escribe la respuesta...',
   [GrammarCategory.COUNTER]: 'Escribe la lectura...',
   [GrammarCategory.SENTENCE]: '',
+  [GrammarCategory.KOSOADO]: 'Escribe la palabra (kore, sono…)',
 }
 
 function counterRomaji(card: Extract<GrammarCard, { kind: GrammarCategory.COUNTER }>): string {
@@ -55,12 +57,13 @@ function contextLineFor(card: GrammarCard): string | undefined {
   // The sentence prompt card already shows the translation once answered.
   if (card.kind === GrammarCategory.SENTENCE) return undefined
   if (card.kind === GrammarCategory.PARTICLE) return card.item.translation
+  if (card.kind === GrammarCategory.KOSOADO) return card.item.translation
   if (card.kind === GrammarCategory.COUNTER) return card.item.usage
   return card.item.meaning
 }
 
 function toMissedItem(card: GrammarCard): MissedItem {
-  if (card.kind === GrammarCategory.PARTICLE) {
+  if (card.kind === GrammarCategory.PARTICLE || card.kind === GrammarCategory.KOSOADO) {
     return {
       id: card.id,
       prompt: `${card.item.sentenceParts[0]}＿${card.item.sentenceParts[1]}`,
@@ -83,6 +86,7 @@ function toMissedItem(card: GrammarCard): MissedItem {
 
 function PromptCard({ card, state }: { card: GrammarCard; state: GrammarQuizState }) {
   if (card.kind === GrammarCategory.PARTICLE) return <ParticleSentenceCard item={card.item} />
+  if (card.kind === GrammarCategory.KOSOADO) return <KosoadoSentenceCard item={card.item} />
   if (card.kind === GrammarCategory.SENTENCE) {
     return (
       <SentencePromptCard

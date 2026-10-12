@@ -57,6 +57,8 @@ const GRAMMAR_GLYPHS: Record<GrammarScreen, string> = {
   [GrammarScreen.ADJECTIVE_QUIZ]: '形',
   [GrammarScreen.COUNTER_TABLE]: '個',
   [GrammarScreen.COUNTER_QUIZ]: '個',
+  [GrammarScreen.KOSOADO_TABLE]: 'こ',
+  [GrammarScreen.KOSOADO_QUIZ]: 'こ',
   [GrammarScreen.SENTENCE_QUIZ]: '並',
 }
 

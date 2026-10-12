@@ -13,6 +13,7 @@ import { CheckParticleAnswer } from '../../domain/usecases/CheckParticleAnswer'
 import { CheckConjugationAnswer } from '../../domain/usecases/CheckConjugationAnswer'
 import { CheckCounterAnswer } from '../../domain/usecases/CheckCounterAnswer'
 import { CheckSentenceAnswer } from '../../domain/usecases/CheckSentenceAnswer'
+import { CheckKosoadoAnswer } from '../../domain/usecases/CheckKosoadoAnswer'
 import { GenerateGrammarChoices } from '../../domain/usecases/GenerateGrammarChoices'
 import { shuffleArray } from '../../domain/services/shuffleArray'
 import { summarizeSession } from '../../domain/services/summarizeSession'
@@ -25,11 +26,15 @@ const checkParticleAnswerUseCase = new CheckParticleAnswer()
 const checkConjugationAnswerUseCase = new CheckConjugationAnswer()
 const checkCounterAnswerUseCase = new CheckCounterAnswer()
 const checkSentenceAnswerUseCase = new CheckSentenceAnswer()
+const checkKosoadoAnswerUseCase = new CheckKosoadoAnswer()
 const generateGrammarChoices = new GenerateGrammarChoices(grammarRepository)
 
 function checkCard(card: GrammarCard, answer: string): boolean {
   if (card.kind === GrammarCategory.PARTICLE) {
     return checkParticleAnswerUseCase.execute(card.item, answer)
+  }
+  if (card.kind === GrammarCategory.KOSOADO) {
+    return checkKosoadoAnswerUseCase.execute(card.item, answer)
   }
   if (card.kind === GrammarCategory.COUNTER) {
     return checkCounterAnswerUseCase.execute(card.item, card.number, answer)

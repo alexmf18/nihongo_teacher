@@ -5,6 +5,7 @@ import { GrammarCard } from '../entities/GrammarCard'
 // the counter reading in kana.
 export function correctAnswerFor(card: GrammarCard): string {
   if (card.kind === GrammarCategory.PARTICLE) return card.item.particle
+  if (card.kind === GrammarCategory.KOSOADO) return card.item.word
   if (card.kind === GrammarCategory.SENTENCE) return card.item.chunks.join('')
   if (card.kind === GrammarCategory.COUNTER) {
     return card.item.examples.find((e) => e.number === card.number)?.reading ?? ''

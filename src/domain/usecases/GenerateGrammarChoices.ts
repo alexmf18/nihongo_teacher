@@ -1,4 +1,5 @@
-import { CounterItem, GrammarCategory, ParticleItem } from '../entities/GrammarItem'
+import { CounterItem, GrammarCategory, KosoadoItem, ParticleItem } from '../entities/GrammarItem'
+import { findKosoado, KOSOADO_ROWS, KOSOADO_SERIES_ORDER } from '../entities/Kosoado'
 import { GrammarCard } from '../entities/GrammarCard'
 import { IGrammarRepository } from '../repositories/IGrammarRepository'
 import { correctAnswerFor } from '../services/grammarAnswer'
@@ -40,6 +41,7 @@ export class GenerateGrammarChoices {
   private distractorsFor(card: GrammarCard): string[] {
     if (card.kind === GrammarCategory.PARTICLE) return this.particleDistractors(card.item)
     if (card.kind === GrammarCategory.COUNTER) return this.counterDistractors(card.item, card.number)
+    if (card.kind === GrammarCategory.KOSOADO) return this.kosoadoDistractors(card.item)
     // Sentences are answered by ordering tiles, never by picking an option.
     if (card.kind === GrammarCategory.SENTENCE) return []
 
@@ -57,6 +59,20 @@ export class GenerateGrammarChoices {
       CONFUSABLE_PARTICLES.some((group) => group.includes(item.particle) && group.includes(p))
 
     return [...shuffleArray(pool.filter(isConfusable)), ...shuffleArray(pool.filter((p) => !isConfusable(p)))]
+  }
+
+  // The real doubt is the distance (これ / それ / あれ), so the rest of the same
+  // row comes first; then the same series in another kind (これ / この / ここ).
+  private kosoadoDistractors(item: KosoadoItem): string[] {
+    const found = findKosoado(item.word)
+    if (!found) return []
+
+    const accepted = new Set([item.word, ...(item.acceptableWords ?? [])])
+    const seriesIndex = KOSOADO_SERIES_ORDER.indexOf(found.series)
+    const sameRow = found.row.words
+    const sameSeries = KOSOADO_ROWS.filter((row) => row !== found.row).map((row) => row.words[seriesIndex])
+
+    return [...shuffleArray([...sameRow]), ...shuffleArray(sameSeries)].filter((word) => !accepted.has(word))
   }
 
   private counterDistractors(item: CounterItem, number: number): string[] {
