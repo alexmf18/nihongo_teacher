@@ -1,3 +1,5 @@
+import { withShortVowels } from '../../domain/services/romaji'
+
 // Days of the week, months and days of the month. One source for both the reference table (which
 // also shows the kanji) and the practice deck (which asks for the kana reading).
 
@@ -53,12 +55,6 @@ const DAYS_OF_MONTH: [number, string, string, string, boolean][] = [
   [30, '三十日', 'さんじゅうにち', 'sanjuunichi', false],
   [31, '三十一日', 'さんじゅういちにち', 'sanjuuichinichi', false],
 ]
-
-// Also accept the romaji written without long vowels: juu → ju, too → to, you → yo.
-function withShortVowels(romaji: string): string[] {
-  const short = romaji.replace(/uu/g, 'u').replace(/oo/g, 'o').replace(/ou/g, 'o')
-  return short === romaji ? [romaji] : [romaji, short]
-}
 
 const dayOfMonthEntries: CalendarEntry[] = DAYS_OF_MONTH.map(([day, kanji, kana, romaji, irregular]) => ({
   id: `cal-day-${day}`,

@@ -1,5 +1,5 @@
 import { CharacterRepositoryImpl } from '../../../data/repositories/CharacterRepositoryImpl'
-import { CharacterCategory, KanjiGroup, PhraseCategory } from '../../../domain/entities/Character'
+import { CharacterCategory, PhraseCategory } from '../../../domain/entities/Character'
 
 describe('CharacterRepositoryImpl', () => {
   const repository = new CharacterRepositoryImpl()
@@ -22,20 +22,35 @@ describe('CharacterRepositoryImpl', () => {
     chars.forEach((c) => expect(c.category).toBe(CharacterCategory.KANJI))
   })
 
-  it('every kanji has a meaning, readings and a group', () => {
+  it('every kanji has a meaning, a reading and romaji answers', () => {
     const kanji = repository.getByCategory(CharacterCategory.KANJI)
     kanji.forEach((k) => {
       expect(k.meaning?.trim()).toBeTruthy()
-      expect(k.readings?.onyomi.trim()).toBeTruthy()
-      expect(Object.values(KanjiGroup)).toContain(k.kanjiGroup)
+      expect(k.readings!.onyomi.length + k.readings!.kunyomi.length).toBeGreaterThan(0)
+      expect(k.romaji.length).toBeGreaterThan(0)
+      k.romaji.forEach((r) => expect(r).toMatch(/^[a-z]+$/))
     })
   })
 
-  it('every kanji group has at least one kanji', () => {
+  it('covers the JLPT N5 and N4 kanji, ranked from most to least used', () => {
     const kanji = repository.getByCategory(CharacterCategory.KANJI)
-    Object.values(KanjiGroup).forEach((group) => {
-      expect(kanji.some((k) => k.kanjiGroup === group)).toBe(true)
-    })
+    expect(kanji.length).toBeGreaterThanOrEqual(245)
+    expect(kanji.map((k) => k.frequencyRank)).toEqual(kanji.map((_, i) => i + 1))
+    expect(kanji[0].character).toBe('日')
+  })
+
+  it('keeps the ids, and so the progress, of the kanji the app already had', () => {
+    const byCharacter = new Map(repository.getByCategory(CharacterCategory.KANJI).map((k) => [k.character, k]))
+    expect(byCharacter.get('一')?.id).toBe('kj-ichi')
+    expect(byCharacter.get('四')?.id).toBe('j-shi')
+    expect(byCharacter.get('四')?.romaji).toEqual(expect.arrayContaining(['shi', 'yon']))
+    expect(byCharacter.get('猫')?.id).toBe('kj-neko')
+  })
+
+  it('accepts on, kun and okurigana readings of a new kanji', () => {
+    const kau = repository.getByCategory(CharacterCategory.KANJI).find((k) => k.character === '会')!
+    expect(kau.romaji[0]).toBe('kai')
+    expect(kau.romaji).toEqual(expect.arrayContaining(['kai', 'a', 'au']))
   })
 
   it('returns words', () => {

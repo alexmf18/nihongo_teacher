@@ -31,27 +31,12 @@ export const PHRASE_CATEGORY_LABELS: Record<PhraseCategory, string> = {
   [PhraseCategory.COURTESY]: 'Cortesía',
 }
 
-export enum KanjiGroup {
-  NUMBERS = 'numbers',
-  NATURE = 'nature',
-  DIRECTIONS = 'directions',
-  PEOPLE_PLACES = 'people_places',
-  DAILY_LIFE = 'daily_life',
-}
-
-export const KANJI_GROUP_LABELS: Record<KanjiGroup, { title: string; subtitle: string }> = {
-  [KanjiGroup.NUMBERS]: { title: 'Números', subtitle: '数字' },
-  [KanjiGroup.NATURE]: { title: 'Naturaleza', subtitle: '自然' },
-  [KanjiGroup.DIRECTIONS]: { title: 'Direcciones y Posición', subtitle: '方角' },
-  [KanjiGroup.PEOPLE_PLACES]: { title: 'Personas y Lugares', subtitle: '人と場所' },
-  [KanjiGroup.DAILY_LIFE]: { title: 'Vida Cotidiana', subtitle: '日常生活' },
-}
-
-// Display strings for the kanji table, e.g. 'いち (ichi)'. The accepted quiz
-// answers live in Character.romaji; these are only shown to the learner.
+// The main readings, in kana, shown in the kanji table. A dot in a kun'yomi marks
+// where the okurigana starts (あ.う is written 会う). The accepted quiz answers
+// live in Character.romaji, which also covers rarer readings.
 export interface KanjiReadings {
-  onyomi: string
-  kunyomi?: string
+  onyomi: string[]
+  kunyomi: string[]
 }
 
 export interface ExampleSentence {
@@ -67,6 +52,7 @@ export interface Character {
   meaning?: string
   phraseCategory?: PhraseCategory
   exampleSentence?: ExampleSentence
-  kanjiGroup?: KanjiGroup
   readings?: KanjiReadings
+  // Kanji only: position by frequency of use, 1 = most used.
+  frequencyRank?: number
 }
