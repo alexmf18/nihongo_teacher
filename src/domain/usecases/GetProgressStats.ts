@@ -13,6 +13,7 @@ const TRACKED_CATEGORIES = [
   CharacterCategory.WORD,
   CharacterCategory.PHRASE,
   CharacterCategory.NUMBER,
+  CharacterCategory.CALENDAR,
 ]
 
 export interface CategoryStats {

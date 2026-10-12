@@ -1,4 +1,5 @@
 import { Character, CharacterCategory, KanjiGroup, PhraseCategory } from '../../domain/entities/Character'
+import { calendarGroups } from './calendarData'
 
 export const characterData: Character[] = [
   // ========================
@@ -458,4 +459,17 @@ export const characterData: Character[] = [
   { id: 'n-1000', character: 'せん', romaji: ['sen'], meaning: 'mil', category: CharacterCategory.NUMBER },
   { id: 'n-10000', character: 'まん', romaji: ['man'], meaning: 'diez mil', category: CharacterCategory.NUMBER },
   { id: 'n-0', character: 'れい', romaji: ['rei', 'zero'], meaning: 'cero', category: CharacterCategory.NUMBER },
+
+  // ========================
+  // DAYS AND MONTHS (see calendarData.ts)
+  // ========================
+  ...calendarGroups.flatMap((group) =>
+    group.entries.map((entry) => ({
+      id: entry.id,
+      character: entry.kana,
+      romaji: entry.romaji,
+      meaning: entry.meaning,
+      category: CharacterCategory.CALENDAR,
+    })),
+  ),
 ]

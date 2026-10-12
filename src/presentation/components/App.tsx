@@ -9,6 +9,7 @@ import { HiraganaTable } from './HiraganaTable'
 import { KatakanaTable } from './KatakanaTable'
 import { KanjiTable } from './KanjiTable'
 import { NumberTable } from './NumberTable'
+import { CalendarTable } from './CalendarTable'
 import { WordTable } from './WordTable'
 import { PhraseTable } from './PhraseTable'
 import { ParticleTable } from './ParticleTable'
@@ -175,6 +176,8 @@ export function App() {
             <KanjiTable />
           ) : state.category === CharacterCategory.NUMBER_TABLE ? (
             <NumberTable />
+          ) : state.category === CharacterCategory.CALENDAR_TABLE ? (
+            <CalendarTable />
           ) : state.category === CharacterCategory.WORD_TABLE ? (
             <WordTable />
           ) : state.category === CharacterCategory.PHRASE_TABLE ? (

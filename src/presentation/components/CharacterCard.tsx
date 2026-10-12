@@ -20,6 +20,7 @@ const CATEGORY_LABELS: Partial<Record<CharacterCategory, string>> = {
   [CharacterCategory.WORD]: 'Palabra',
   [CharacterCategory.PHRASE]: 'Frase',
   [CharacterCategory.NUMBER]: 'Número',
+  [CharacterCategory.CALENDAR]: 'Día o mes',
 }
 
 function SpeakerIcon({ className }: { className: string }) {

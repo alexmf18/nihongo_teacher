@@ -56,6 +56,19 @@ describe('CharacterRepositoryImpl', () => {
     chars.forEach((c) => expect(c.category).toBe(CharacterCategory.NUMBER))
   })
 
+  it('returns the weekdays, months, days of the month and their questions as calendar cards', () => {
+    const chars = repository.getByCategory(CharacterCategory.CALENDAR)
+    expect(chars).toHaveLength(7 + 12 + 31 + 3)
+    chars.forEach((c) => expect(c.meaning).toBeTruthy())
+    // The irregular month readings are the ones learners get wrong.
+    expect(chars.find((c) => c.meaning === 'abril')?.romaji).toEqual(['shigatsu'])
+    expect(chars.find((c) => c.meaning === 'septiembre')?.romaji).toEqual(['kugatsu'])
+    expect(chars.find((c) => c.meaning === 'día 20')?.character).toBe('はつか')
+    // Long vowels may be typed short.
+    expect(chars.find((c) => c.meaning === 'día 8')?.romaji).toEqual(['youka', 'yoka'])
+    expect(chars.find((c) => c.meaning === 'día 14')?.romaji).toEqual(['juuyokka', 'juyokka'])
+  })
+
   it('filters phrases by subcategory', () => {
     const greetings = repository.getByCategory(CharacterCategory.PHRASE, PhraseCategory.GREETINGS)
     expect(greetings.length).toBeGreaterThan(0)
@@ -96,7 +109,10 @@ describe('CharacterRepositoryImpl', () => {
     const words = repository.getByCategory(CharacterCategory.WORD)
     const phrases = repository.getByCategory(CharacterCategory.PHRASE)
     const numbers = repository.getByCategory(CharacterCategory.NUMBER)
-    expect(all.length).toBe(hiragana.length + katakana.length + kanji.length + words.length + phrases.length + numbers.length)
+    const calendar = repository.getByCategory(CharacterCategory.CALENDAR)
+    expect(all.length).toBe(
+      hiragana.length + katakana.length + kanji.length + words.length + phrases.length + numbers.length + calendar.length
+    )
   })
 
   it('all characters have unique ids', () => {

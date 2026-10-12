@@ -9,6 +9,7 @@ const CATEGORY_LABELS: Partial<Record<CharacterCategory, string>> = {
   [CharacterCategory.WORD]: 'Palabras',
   [CharacterCategory.PHRASE]: 'Frases',
   [CharacterCategory.NUMBER]: 'Números',
+  [CharacterCategory.CALENDAR]: 'Días y meses',
 }
 
 interface StatsScreenProps {

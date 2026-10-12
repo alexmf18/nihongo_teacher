@@ -33,6 +33,7 @@ const learningCategories: NavItem[] = [
   { key: CharacterCategory.KATAKANA_TABLE, label: 'Tabla Katakana', glyph: 'ア' },
   { key: CharacterCategory.KANJI_TABLE, label: 'Tabla Kanji', glyph: '漢' },
   { key: CharacterCategory.NUMBER_TABLE, label: 'Tabla de Números', glyph: '数' },
+  { key: CharacterCategory.CALENDAR_TABLE, label: 'Tabla de Días y Meses', glyph: '曜' },
   { key: CharacterCategory.WORD_TABLE, label: 'Tabla de Palabras', glyph: '語' },
   { key: CharacterCategory.PHRASE_TABLE, label: 'Tabla de Frases', glyph: '文' },
 ]
@@ -44,6 +45,7 @@ const practiceCategories: NavItem[] = [
   { key: CharacterCategory.WORD, label: 'Palabras', glyph: '語' },
   { key: CharacterCategory.PHRASE, label: 'Frases', glyph: '文' },
   { key: CharacterCategory.NUMBER, label: 'Números', glyph: '数' },
+  { key: CharacterCategory.CALENDAR, label: 'Días y meses', glyph: '曜' },
 ]
 
 const GRAMMAR_GLYPHS: Record<GrammarScreen, string> = {

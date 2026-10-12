@@ -5,12 +5,14 @@ export enum CharacterCategory {
   WORD = 'word',
   PHRASE = 'phrase',
   NUMBER = 'number',
+  CALENDAR = 'calendar',
   HIRAGANA_TABLE = 'hiragana_table',
   KATAKANA_TABLE = 'katakana_table',
   KANJI_TABLE = 'kanji_table',
   NUMBER_TABLE = 'number_table',
   WORD_TABLE = 'word_table',
   PHRASE_TABLE = 'phrase_table',
+  CALENDAR_TABLE = 'calendar_table',
 }
 
 export enum PhraseCategory {
